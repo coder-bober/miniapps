@@ -8,6 +8,7 @@ import { CoreAppPageShell } from "@/core/pages/core-app-page-shell";
 import { isModuleEnabled } from "@/shared/modules/enabled-modules";
 import { WorkspaceFilesCard } from "@/modules/workspace-files/components/workspace-files-card";
 import { WorkspaceMembersCard } from "@/modules/workspaces/components/workspace-members-card";
+import { WorkspaceModuleLabAccessCard } from "@/modules/workspaces/components/workspace-module-lab-access-card";
 
 type PageProps = {
   params: Promise<{
@@ -50,6 +51,9 @@ export default async function WorkspacePage({ params }: PageProps) {
           dictionary={dictionary.app.workspace}
           sharedDictionary={dictionary.app.shared}
         />
+        {isModuleEnabled("module-lab") ? (
+          <WorkspaceModuleLabAccessCard dictionary={dictionary.app.workspace} />
+        ) : null}
         {workspaceFilesEnabled ? (
           <WorkspaceFilesCard dictionary={dictionary.app.workspace} />
         ) : null}

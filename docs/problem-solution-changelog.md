@@ -1,5 +1,11 @@
 # Important changes
 
+## ModuleLab disconnected from workspace access
+
+Problem: ModuleLab could still be reached from authenticated app navigation without `bbb`, and workspace membership granted default ModuleLab read access. That made ModuleLab behave like one global diagnostics surface instead of a per-workspace module with explicit access rights.
+
+Solution: removed the `WORKSPACE_RBAC_STRICT` opt-out path, made authenticated ModuleLab API requests always require workspace context, removed ModuleLab default membership capabilities, and added workspace owner/admin ModuleLab access management backed by `workspace_module_roles`. App navigation now preserves the current workspace in ModuleLab links.
+
 ## Production builds fetched Google Fonts
 
 Problem: production e2e builds used `next/font/google` for Manrope and Space Grotesk, so an environment without reliable access to `fonts.googleapis.com` could fail before tests started. The `NEXT_PUBLIC_SITE_URL` auth-callback redirect behavior already had focused coverage, but that regression was not part of the standard API suite.

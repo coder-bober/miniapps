@@ -1,5 +1,13 @@
 # Changelog
 
+## ModuleLab workspace access management
+
+- Removed the `WORKSPACE_RBAC_STRICT` runtime opt-out; workspace RBAC now behaves as always strict.
+- ModuleLab authenticated API/status/job requests now always require explicit workspace context.
+- Removed default ModuleLab read access from workspace membership; ModuleLab access now comes from explicit `workspace_module_roles` rows.
+- Added owner/admin workspace UI and API routes for setting ModuleLab access to no access, viewer, or operator.
+- Authenticated app ModuleLab links now preserve the selected workspace with `bbb=<workspaceId>`.
+
 ## Local production fonts
 
 - Replaced `next/font/google` with local `@fontsource-variable` Manrope and Space Grotesk packages so production builds no longer depend on fetching Google Fonts.

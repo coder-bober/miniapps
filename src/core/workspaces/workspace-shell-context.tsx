@@ -99,7 +99,9 @@ export function WorkspaceShellProvider({ dictionary, children }: WorkspaceShellP
   }, [dictionary.workspaceUnavailable]);
 
   useEffect(() => {
-    void loadWorkspaces();
+    queueMicrotask(() => {
+      void loadWorkspaces();
+    });
   }, [loadWorkspaces]);
 
   const currentWorkspace = useMemo(() => {
@@ -116,7 +118,9 @@ export function WorkspaceShellProvider({ dictionary, children }: WorkspaceShellP
     const selectedWorkspaceId = searchParams.get("bbb");
 
     if (!selectedWorkspaceId) {
-      setFallbackNotice(null);
+      queueMicrotask(() => {
+        setFallbackNotice(null);
+      });
       return;
     }
 
@@ -125,7 +129,9 @@ export function WorkspaceShellProvider({ dictionary, children }: WorkspaceShellP
     }
 
     const matchedWorkspace = workspaces.find((workspace) => workspace.id === selectedWorkspaceId);
-    setFallbackNotice(matchedWorkspace ? null : dictionary.workspaceFallbackNotice);
+    queueMicrotask(() => {
+      setFallbackNotice(matchedWorkspace ? null : dictionary.workspaceFallbackNotice);
+    });
   }, [dictionary.workspaceFallbackNotice, searchParams, workspaces]);
 
   const switchWorkspace = useCallback((workspaceId: string | null) => {

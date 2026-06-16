@@ -140,6 +140,17 @@ export type SiteDictionary = {
       membersTransferLabel: string;
       membersTransferSubmit: string;
       membersTransferSuccess: string;
+      moduleLabAccessTitle: string;
+      moduleLabAccessDescription: string;
+      moduleLabAccessOwnerAdminNotice: string;
+      moduleLabAccessReadOnlyNotice: string;
+      moduleLabAccessNoAccess: string;
+      moduleLabAccessViewer: string;
+      moduleLabAccessOperator: string;
+      moduleLabAccessSave: string;
+      moduleLabAccessLoadFailed: string;
+      moduleLabAccessUpdateSuccess: string;
+      moduleLabAccessUpdateFailed: string;
       workspacesLabel: string;
       workspacesHint: string;
       workspacesLoadFailed: string;
@@ -438,6 +449,20 @@ const en: SiteDictionary = {
       membersTransferLabel: "New owner",
       membersTransferSubmit: "Transfer ownership",
       membersTransferSuccess: "Workspace ownership was transferred.",
+      moduleLabAccessTitle: "ModuleLab access",
+      moduleLabAccessDescription:
+        "Control who can use the ModuleLab diagnostics surface inside this workspace.",
+      moduleLabAccessOwnerAdminNotice:
+        "Workspace owners and admins can change ModuleLab access for current workspace members.",
+      moduleLabAccessReadOnlyNotice:
+        "Your workspace role can view ModuleLab access, but cannot change it.",
+      moduleLabAccessNoAccess: "No access",
+      moduleLabAccessViewer: "Viewer",
+      moduleLabAccessOperator: "Operator",
+      moduleLabAccessSave: "Save access",
+      moduleLabAccessLoadFailed: "We could not load ModuleLab access. Try again.",
+      moduleLabAccessUpdateSuccess: "ModuleLab access was updated.",
+      moduleLabAccessUpdateFailed: "We could not update ModuleLab access. Try again.",
       workspacesLabel: "Workspace",
       workspacesHint: "Switch between your personal and shared workspaces.",
       workspacesLoadFailed: "We could not load the available workspaces. Try again.",
@@ -797,6 +822,20 @@ const ru: SiteDictionary = {
       membersTransferLabel: "Новый владелец",
       membersTransferSubmit: "Передать владение",
       membersTransferSuccess: "Владение рабочим пространством передано.",
+      moduleLabAccessTitle: "Доступ к ModuleLab",
+      moduleLabAccessDescription:
+        "Управляйте тем, кто может использовать диагностическую поверхность ModuleLab в этом рабочем пространстве.",
+      moduleLabAccessOwnerAdminNotice:
+        "Владельцы и администраторы рабочего пространства могут менять доступ к ModuleLab для текущих участников.",
+      moduleLabAccessReadOnlyNotice:
+        "Ваша роль в рабочем пространстве позволяет видеть доступ к ModuleLab, но не менять его.",
+      moduleLabAccessNoAccess: "Нет доступа",
+      moduleLabAccessViewer: "Просмотр",
+      moduleLabAccessOperator: "Оператор",
+      moduleLabAccessSave: "Сохранить доступ",
+      moduleLabAccessLoadFailed: "Не удалось загрузить доступ к ModuleLab. Попробуйте еще раз.",
+      moduleLabAccessUpdateSuccess: "Доступ к ModuleLab обновлен.",
+      moduleLabAccessUpdateFailed: "Не удалось обновить доступ к ModuleLab. Попробуйте еще раз.",
       workspacesLabel: "Рабочее пространство",
       workspacesHint: "Переключайтесь между личным и общими рабочими пространствами.",
       workspacesLoadFailed: "Не удалось загрузить доступные рабочие пространства. Попробуйте еще раз.",

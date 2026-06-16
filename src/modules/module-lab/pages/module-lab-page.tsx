@@ -1,6 +1,5 @@
 import { Alert, Stack, Text } from "@mantine/core";
 
-import { getCurrentUserModuleAccess } from "@/core/authz/module-access";
 import { ModulePublicPageShell } from "@/core/modules/module-public-page-shell";
 import { resolvePublicWorkspaceSelection } from "@/core/workspaces/public-workspace";
 import { getCurrentUserWorkspaceModuleAccess } from "@/core/authz/module-access";
@@ -71,13 +70,11 @@ async function ResolvedModuleLabPage({
   user: AuthenticatedUser;
   publicWorkspaceSelection: Awaited<ReturnType<typeof resolvePublicWorkspaceSelection>>;
 }) {
-  const moduleAccess = publicWorkspaceSelection.workspace
-    ? await getCurrentUserWorkspaceModuleAccess(
-        user.id,
-        publicWorkspaceSelection.workspace.id,
-        "module-lab",
-      )
-    : await getCurrentUserModuleAccess(user.id, "module-lab");
+  const moduleAccess = await getCurrentUserWorkspaceModuleAccess(
+    user.id,
+    publicWorkspaceSelection.workspace?.id ?? null,
+    "module-lab",
+  );
   const canRead = moduleAccess.capabilities.includes("module-lab.read");
   const canRunJob = moduleAccess.capabilities.includes("module-lab.run_job");
 

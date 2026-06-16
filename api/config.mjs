@@ -26,7 +26,6 @@ export function getApiConfig() {
       : process.env.REDIS_MAX_RETRIES_PER_REQUEST === "null"
         ? null
         : Number(process.env.REDIS_MAX_RETRIES_PER_REQUEST);
-  const workspaceRbacStrict = process.env.WORKSPACE_RBAC_STRICT !== "false";
 
   return {
     supabaseUrl,
@@ -43,7 +42,6 @@ export function getApiConfig() {
     storageS3EnsureBucketOnStart,
     redisUrl,
     redisMaxRetriesPerRequest,
-    workspaceRbacStrict,
   };
 }
 

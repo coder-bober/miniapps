@@ -3,6 +3,7 @@ import {
   createWorkspaceRequestSchema,
   transferWorkspaceOwnershipRequestSchema,
   updateWorkspaceMemberRoleRequestSchema,
+  updateWorkspaceModuleRoleRequestSchema,
 } from "../../src/shared/api/workspaces.mjs";
 import { resolveAuthenticatedRequest } from "../lib/auth.mjs";
 
@@ -11,6 +12,13 @@ function mapWorkspaceMemberError(error, reply, fallback) {
     return reply.code(403).send({
       error: "workspace_member_access_denied",
       message: "The current user is not allowed to manage workspace members.",
+    });
+  }
+
+  if (error?.code === "workspace_module_role_access_denied") {
+    return reply.code(403).send({
+      error: "workspace_module_role_access_denied",
+      message: "The current user is not allowed to manage workspace module roles.",
     });
   }
 
@@ -38,6 +46,13 @@ function mapWorkspaceMemberError(error, reply, fallback) {
   if (error?.code === "workspace_member_not_found") {
     return reply.code(404).send({
       error: "workspace_member_not_found",
+      message: "The requested workspace member was not found.",
+    });
+  }
+
+  if (error?.code === "workspace_module_role_member_not_found") {
+    return reply.code(404).send({
+      error: "workspace_module_role_member_not_found",
       message: "The requested workspace member was not found.",
     });
   }
@@ -135,6 +150,109 @@ export async function registerWorkspaceRoutes(app) {
       return reply.code(500).send({
         error: "workspace_member_list_failed",
         message: "The backend could not load the workspace members.",
+      });
+    }
+  });
+
+  app.get("/v1/workspaces/:workspaceId/module-roles/module-lab", async (request, reply) => {
+    const authentication = await resolveAuthenticatedRequest(request, reply);
+
+    if (!authentication.ok) {
+      return authentication.response;
+    }
+
+    try {
+      const moduleRoles = await request.server.services.listWorkspaceModuleRoles({
+        workspaceId: request.params.workspaceId,
+        actorUserId: authentication.user.id,
+        moduleId: "module-lab",
+      });
+
+      return reply.send({ moduleRoles });
+    } catch (error) {
+      const handled = mapWorkspaceMemberError(error, reply, {
+        error: "workspace_module_role_list_failed",
+        message: "The workspace module role list request was invalid.",
+      });
+
+      if (handled) {
+        return handled;
+      }
+
+      request.log.error({ err: error }, "Workspace module role list failed");
+      return reply.code(500).send({
+        error: "workspace_module_role_list_failed",
+        message: "The backend could not load the workspace module roles.",
+      });
+    }
+  });
+
+  app.patch("/v1/workspaces/:workspaceId/module-roles/module-lab/:userId", async (request, reply) => {
+    const authentication = await resolveAuthenticatedRequest(request, reply);
+
+    if (!authentication.ok) {
+      return authentication.response;
+    }
+
+    try {
+      const payload = updateWorkspaceModuleRoleRequestSchema.parse(request.body ?? {});
+      const moduleRole = await request.server.services.updateWorkspaceModuleRole({
+        workspaceId: request.params.workspaceId,
+        actorUserId: authentication.user.id,
+        targetUserId: request.params.userId,
+        moduleId: "module-lab",
+        role: payload.role,
+      });
+
+      return reply.send({ moduleRole });
+    } catch (error) {
+      const handled = mapWorkspaceMemberError(error, reply, {
+        error: "workspace_module_role_invalid",
+        message: "Provide a valid module-lab role.",
+      });
+
+      if (handled) {
+        return handled;
+      }
+
+      request.log.error({ err: error }, "Workspace module role update failed");
+      return reply.code(500).send({
+        error: "workspace_module_role_update_failed",
+        message: "The backend could not update the workspace module role.",
+      });
+    }
+  });
+
+  app.delete("/v1/workspaces/:workspaceId/module-roles/module-lab/:userId", async (request, reply) => {
+    const authentication = await resolveAuthenticatedRequest(request, reply);
+
+    if (!authentication.ok) {
+      return authentication.response;
+    }
+
+    try {
+      await request.server.services.removeWorkspaceModuleRole({
+        workspaceId: request.params.workspaceId,
+        actorUserId: authentication.user.id,
+        targetUserId: request.params.userId,
+        moduleId: "module-lab",
+      });
+
+      return reply.send({ ok: true });
+    } catch (error) {
+      const handled = mapWorkspaceMemberError(error, reply, {
+        error: "workspace_module_role_remove_failed",
+        message: "The workspace module role removal request was invalid.",
+      });
+
+      if (handled) {
+        return handled;
+      }
+
+      request.log.error({ err: error }, "Workspace module role removal failed");
+      return reply.code(500).send({
+        error: "workspace_module_role_remove_failed",
+        message: "The backend could not remove the workspace module role.",
       });
     }
   });

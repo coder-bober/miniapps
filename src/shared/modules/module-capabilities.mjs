@@ -7,11 +7,7 @@ const moduleRoleCapabilityMap = {
 };
 
 const workspaceMembershipCapabilityMap = {
-  "module-lab": {
-    owner: ["module-lab.read"],
-    admin: ["module-lab.read"],
-    member: ["module-lab.read"],
-  },
+  "module-lab": {},
   "workspace-files": {
     owner: [
       "workspace-files.read",

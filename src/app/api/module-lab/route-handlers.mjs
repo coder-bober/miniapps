@@ -27,7 +27,7 @@ function workspaceRequiredResponse() {
   return jsonResponse(
     {
       error: "workspace_required",
-      message: "A workspaceId is required when workspace RBAC strict mode is enabled.",
+      message: "A workspaceId is required for authenticated module-lab requests.",
     },
     { status: 400 },
   );
@@ -62,7 +62,6 @@ function readRequestedWorkspaceId(request) {
 export function createModuleLabRouteHandlers({
   isModuleEnabled,
   createSupabaseServerClient,
-  getCurrentUserModuleAccess,
   getCurrentUserWorkspaceModuleAccess,
   getInternalApiUrl,
   fetchImplementation = globalThis.fetch,
@@ -83,17 +82,15 @@ export function createModuleLabRouteHandlers({
 
     const requestedWorkspaceId = readRequestedWorkspaceId(request);
 
-    if (!requestedWorkspaceId && process.env.WORKSPACE_RBAC_STRICT !== "false") {
+    if (!requestedWorkspaceId) {
       return workspaceRequiredResponse();
     }
 
-    const moduleAccess = requestedWorkspaceId
-      ? await getCurrentUserWorkspaceModuleAccess(
-          authorizedHeaders.userId,
-          requestedWorkspaceId,
-          "module-lab",
-        )
-      : await getCurrentUserModuleAccess(authorizedHeaders.userId, "module-lab");
+    const moduleAccess = await getCurrentUserWorkspaceModuleAccess(
+      authorizedHeaders.userId,
+      requestedWorkspaceId,
+      "module-lab",
+    );
 
     if (!moduleAccess.capabilities.includes("module-lab.read")) {
       return forbiddenResponse("module-lab.read");
@@ -160,17 +157,15 @@ export function createModuleLabRouteHandlers({
 
     const requestedWorkspaceId = readRequestedWorkspaceId(request);
 
-    if (!requestedWorkspaceId && process.env.WORKSPACE_RBAC_STRICT !== "false") {
+    if (!requestedWorkspaceId) {
       return workspaceRequiredResponse();
     }
 
-    const moduleAccess = requestedWorkspaceId
-      ? await getCurrentUserWorkspaceModuleAccess(
-          authorizedHeaders.userId,
-          requestedWorkspaceId,
-          "module-lab",
-        )
-      : await getCurrentUserModuleAccess(authorizedHeaders.userId, "module-lab");
+    const moduleAccess = await getCurrentUserWorkspaceModuleAccess(
+      authorizedHeaders.userId,
+      requestedWorkspaceId,
+      "module-lab",
+    );
 
     if (!moduleAccess.capabilities.includes("module-lab.run_job")) {
       return forbiddenResponse("module-lab.run_job");

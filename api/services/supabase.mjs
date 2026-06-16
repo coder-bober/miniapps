@@ -49,6 +49,15 @@ function mapPublicWorkspaceRecord(item) {
   };
 }
 
+function mapWorkspaceModuleRoleRecord(item) {
+  return {
+    workspaceId: item.workspace_id,
+    userId: item.user_id,
+    moduleId: item.module_id,
+    role: item.role,
+  };
+}
+
 function slugifyWorkspaceName(name) {
   return name
     .toLowerCase()
@@ -140,6 +149,32 @@ export function createApiServices(config = getApiConfig(), overrides = {}) {
 
     if (!workspace || workspace.kind !== "shared") {
       const error = new Error("Member management is supported only for shared workspaces.");
+      error.code = "workspace_personal_membership_unsupported";
+      throw error;
+    }
+
+    return {
+      workspace,
+      actorMembership,
+    };
+  }
+
+  async function ensureOwnerOrAdminManagedSharedWorkspace({ workspaceId, actorUserId }) {
+    const actorMembership = await getWorkspaceMembershipRecord({
+      workspaceId,
+      userId: actorUserId,
+    });
+
+    if (!actorMembership || !["owner", "admin"].includes(actorMembership.role)) {
+      const error = new Error("The current user is not allowed to manage module access.");
+      error.code = "workspace_module_role_access_denied";
+      throw error;
+    }
+
+    const workspace = await getWorkspaceRecord(workspaceId);
+
+    if (!workspace || workspace.kind !== "shared") {
+      const error = new Error("Module role management is supported only for shared workspaces.");
       error.code = "workspace_personal_membership_unsupported";
       throw error;
     }
@@ -250,7 +285,6 @@ export function createApiServices(config = getApiConfig(), overrides = {}) {
   }
 
   return {
-    workspaceRbacStrict: resolvedConfig.workspaceRbacStrict === true,
     async verifyAccessToken(accessToken) {
       const { data, error } = await publicClient.auth.getUser(accessToken);
 
@@ -476,6 +510,95 @@ export function createApiServices(config = getApiConfig(), overrides = {}) {
 
       return await buildWorkspaceMemberSummaryList(workspaceId);
     },
+    async listWorkspaceModuleRoles({ workspaceId, actorUserId, moduleId }) {
+      const actorRole = await this.getWorkspaceMembershipRole({
+        workspaceId,
+        userId: actorUserId,
+      });
+
+      if (!actorRole) {
+        const error = new Error("The current user is not a member of this workspace.");
+        error.code = "workspace_module_role_access_denied";
+        throw error;
+      }
+
+      const { data, error } = await adminClient
+        .from("workspace_module_roles")
+        .select("workspace_id, user_id, module_id, role")
+        .eq("workspace_id", workspaceId)
+        .eq("module_id", moduleId);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map(mapWorkspaceModuleRoleRecord);
+    },
+    async updateWorkspaceModuleRole({ workspaceId, actorUserId, targetUserId, moduleId, role }) {
+      await ensureOwnerOrAdminManagedSharedWorkspace({
+        workspaceId,
+        actorUserId,
+      });
+
+      const targetMembership = await getWorkspaceMembershipRecord({
+        workspaceId,
+        userId: targetUserId,
+      });
+
+      if (!targetMembership) {
+        const error = new Error("The requested workspace member was not found.");
+        error.code = "workspace_module_role_member_not_found";
+        throw error;
+      }
+
+      const { data, error } = await adminClient
+        .from("workspace_module_roles")
+        .upsert(
+          {
+            workspace_id: workspaceId,
+            user_id: targetUserId,
+            module_id: moduleId,
+            role,
+          },
+          { onConflict: "workspace_id,user_id,module_id" },
+        )
+        .select("workspace_id, user_id, module_id, role")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return mapWorkspaceModuleRoleRecord(data);
+    },
+    async removeWorkspaceModuleRole({ workspaceId, actorUserId, targetUserId, moduleId }) {
+      await ensureOwnerOrAdminManagedSharedWorkspace({
+        workspaceId,
+        actorUserId,
+      });
+
+      const targetMembership = await getWorkspaceMembershipRecord({
+        workspaceId,
+        userId: targetUserId,
+      });
+
+      if (!targetMembership) {
+        const error = new Error("The requested workspace member was not found.");
+        error.code = "workspace_module_role_member_not_found";
+        throw error;
+      }
+
+      const { error } = await adminClient
+        .from("workspace_module_roles")
+        .delete()
+        .eq("workspace_id", workspaceId)
+        .eq("user_id", targetUserId)
+        .eq("module_id", moduleId);
+
+      if (error) {
+        throw error;
+      }
+    },
     async addWorkspaceMember({ workspaceId, actorUserId, email, role }) {
       await ensureOwnerManagedSharedWorkspace({
         workspaceId,
@@ -588,9 +711,19 @@ export function createApiServices(config = getApiConfig(), overrides = {}) {
       if (deleteResponse.error) {
         throw deleteResponse.error;
       }
+
+      const moduleRoleDeleteResponse = await adminClient
+        .from("workspace_module_roles")
+        .delete()
+        .eq("workspace_id", workspaceId)
+        .eq("user_id", targetUserId);
+
+      if (moduleRoleDeleteResponse.error) {
+        throw moduleRoleDeleteResponse.error;
+      }
     },
     async transferWorkspaceOwnership({ workspaceId, actorUserId, newOwnerUserId }) {
-      if (resolvedConfig.workspaceRbacStrict === true && typeof adminClient.rpc === "function") {
+      if (typeof adminClient.rpc === "function") {
         const { error } = await adminClient.rpc("transfer_workspace_ownership", {
           p_workspace_id: workspaceId,
           p_actor_user_id: actorUserId,

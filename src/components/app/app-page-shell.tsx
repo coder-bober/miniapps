@@ -7,7 +7,7 @@ import {
   WorkspaceShellSwitcher,
 } from "@/core/workspaces/workspace-shell-context";
 import { AppSectionNav } from "@/components/app/app-section-nav";
-import { SiteHeader } from "@/components/site-header";
+import { WorkspaceAwareSiteHeader } from "@/components/app/workspace-aware-site-header";
 import type { Locale } from "@/lib/i18n/config";
 import type { SiteDictionary } from "@/lib/i18n/dictionaries";
 import { getModuleNavItems } from "@/modules/navigation";
@@ -53,8 +53,8 @@ export function AppPageShell({
             }}
           >
             <Stack gap="xl">
-              <SiteHeader
-                dictionary={dictionary.header}
+              <WorkspaceAwareSiteHeader
+                dictionary={dictionary}
                 locale={locale}
                 user={user}
                 marketingModuleLinks={marketingModuleLinks}

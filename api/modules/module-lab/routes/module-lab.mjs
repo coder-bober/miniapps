@@ -2,7 +2,6 @@ import {
   moduleLabRunJobRequestSchema,
 } from "../../../../src/shared/api/module-lab.mjs";
 import {
-  getUserModuleAccess,
   getUserWorkspaceModuleAccess,
   sendModuleCapabilityRequired,
 } from "../../../core/authz/module-access.mjs";
@@ -20,7 +19,7 @@ function sendModuleLabFailed(request, reply, error) {
 function sendWorkspaceRequired(reply) {
   return reply.code(400).send({
     error: "workspace_required",
-    message: "A workspaceId is required when workspace RBAC strict mode is enabled.",
+    message: "A workspaceId is required for authenticated module-lab requests.",
   });
 }
 
@@ -34,22 +33,16 @@ export async function registerModuleLabRoutes(app) {
 
     const requestedWorkspaceId = readRequestedWorkspaceId(request);
 
-    if (!requestedWorkspaceId && request.server.services.workspaceRbacStrict === true) {
+    if (!requestedWorkspaceId) {
       return sendWorkspaceRequired(reply);
     }
 
-    const moduleAccess = requestedWorkspaceId
-      ? await getUserWorkspaceModuleAccess({
-          services: request.server.services,
-          userId: authentication.user.id,
-          workspaceId: requestedWorkspaceId,
-          moduleId: "module-lab",
-        })
-      : await getUserModuleAccess({
-          services: request.server.services,
-          userId: authentication.user.id,
-          moduleId: "module-lab",
-        });
+    const moduleAccess = await getUserWorkspaceModuleAccess({
+      services: request.server.services,
+      userId: authentication.user.id,
+      workspaceId: requestedWorkspaceId,
+      moduleId: "module-lab",
+    });
 
     if (!moduleAccess.capabilities.includes("module-lab.read")) {
       return sendModuleCapabilityRequired(reply, "module-lab.read");
@@ -77,22 +70,16 @@ export async function registerModuleLabRoutes(app) {
 
     const requestedWorkspaceId = readRequestedWorkspaceId(request);
 
-    if (!requestedWorkspaceId && request.server.services.workspaceRbacStrict === true) {
+    if (!requestedWorkspaceId) {
       return sendWorkspaceRequired(reply);
     }
 
-    const moduleAccess = requestedWorkspaceId
-      ? await getUserWorkspaceModuleAccess({
-          services: request.server.services,
-          userId: authentication.user.id,
-          workspaceId: requestedWorkspaceId,
-          moduleId: "module-lab",
-        })
-      : await getUserModuleAccess({
-          services: request.server.services,
-          userId: authentication.user.id,
-          moduleId: "module-lab",
-        });
+    const moduleAccess = await getUserWorkspaceModuleAccess({
+      services: request.server.services,
+      userId: authentication.user.id,
+      workspaceId: requestedWorkspaceId,
+      moduleId: "module-lab",
+    });
 
     if (!moduleAccess.capabilities.includes("module-lab.run_job")) {
       return sendModuleCapabilityRequired(reply, "module-lab.run_job");

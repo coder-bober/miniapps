@@ -22,6 +22,13 @@ export const workspaceMemberSummarySchema = z.object({
   displayName: z.string(),
 });
 
+export const workspaceModuleRoleSummarySchema = z.object({
+  workspaceId: workspaceIdSchema,
+  userId: z.string().trim().min(1),
+  moduleId: z.literal("module-lab"),
+  role: z.enum(["viewer", "operator"]).nullable(),
+});
+
 export const publicWorkspaceSummarySchema = workspaceSummarySchema.omit({
   membershipRole: true,
   id: true,
@@ -35,6 +42,10 @@ export const workspaceListResponseSchema = z.object({
 
 export const workspaceMemberListResponseSchema = z.object({
   members: z.array(workspaceMemberSummarySchema),
+});
+
+export const workspaceModuleRoleListResponseSchema = z.object({
+  moduleRoles: z.array(workspaceModuleRoleSummarySchema),
 });
 
 export const addWorkspaceMemberRequestSchema = z.object({
@@ -52,6 +63,18 @@ export const updateWorkspaceMemberRoleRequestSchema = z.object({
 
 export const updateWorkspaceMemberRoleResponseSchema = z.object({
   member: workspaceMemberSummarySchema,
+});
+
+export const updateWorkspaceModuleRoleRequestSchema = z.object({
+  role: z.enum(["viewer", "operator"]),
+});
+
+export const updateWorkspaceModuleRoleResponseSchema = z.object({
+  moduleRole: workspaceModuleRoleSummarySchema,
+});
+
+export const removeWorkspaceModuleRoleResponseSchema = z.object({
+  ok: z.literal(true),
 });
 
 export const removeWorkspaceMemberResponseSchema = z.object({
@@ -95,6 +118,12 @@ export const workspaceErrorResponseSchema = z.object({
     "workspace_member_add_failed",
     "workspace_member_update_failed",
     "workspace_member_remove_failed",
+    "workspace_module_role_access_denied",
+    "workspace_module_role_list_failed",
+    "workspace_module_role_invalid",
+    "workspace_module_role_member_not_found",
+    "workspace_module_role_update_failed",
+    "workspace_module_role_remove_failed",
     "workspace_transfer_invalid_target",
     "workspace_transfer_failed",
     "workspace_personal_membership_unsupported",

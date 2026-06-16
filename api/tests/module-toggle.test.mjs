@@ -297,12 +297,10 @@ await runCase("module-lab workspace access denies status when the user has no mo
   });
 });
 
-await runCase("strict module-lab backend requires an explicit workspace", async () => {
+await runCase("module-lab backend requires an explicit workspace", async () => {
   await withEnabledModules("module-lab", async () => {
     const app = buildApiApp({
-      services: createServices({
-        workspaceRbacStrict: true,
-      }),
+      services: createServices(),
     });
 
     try {
@@ -322,15 +320,14 @@ await runCase("strict module-lab backend requires an explicit workspace", async 
   });
 });
 
-await runCase("strict module-lab backend uses workspace module role when workspace is explicit", async () => {
+await runCase("module-lab backend uses workspace module role when workspace is explicit", async () => {
   const queuedJobs = [];
 
   await withEnabledModules("module-lab", async () => {
     const app = buildApiApp({
       services: createServices({
-        workspaceRbacStrict: true,
         async getUserModuleRole() {
-          throw new Error("Strict workspace route must not read global module roles.");
+          throw new Error("Workspace route must not read global module roles.");
         },
         async getWorkspaceMembershipRole({ workspaceId, userId }) {
           assert.equal(workspaceId, "workspace-1");
@@ -379,7 +376,7 @@ await runCase("strict module-lab backend uses workspace module role when workspa
           "content-type": "application/json",
         },
         payload: {
-          message: "hello from strict module-lab",
+          message: "hello from module-lab",
         },
       });
 

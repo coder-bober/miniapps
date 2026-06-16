@@ -105,18 +105,24 @@ export function WorkspaceFilesCard({ dictionary }: WorkspaceFilesCardProps) {
 
   useEffect(() => {
     if (workspaceLoading) {
-      setLoading(true);
+      queueMicrotask(() => {
+        setLoading(true);
+      });
       return;
     }
 
     if (!currentWorkspace) {
-      setFiles([]);
-      setError(workspaceError ?? dictionary.filesLoadFailed);
-      setLoading(false);
+      queueMicrotask(() => {
+        setFiles([]);
+        setError(workspaceError ?? dictionary.filesLoadFailed);
+        setLoading(false);
+      });
       return;
     }
 
-    void loadFiles();
+    queueMicrotask(() => {
+      void loadFiles();
+    });
   }, [currentWorkspace, dictionary.filesLoadFailed, loadFiles, workspaceError, workspaceLoading]);
 
   const waitForThumbnail = useCallback(

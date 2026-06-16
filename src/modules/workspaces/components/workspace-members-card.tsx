@@ -89,17 +89,21 @@ export function WorkspaceMembersCard({
   }, [currentWorkspace, dictionary.membersLoadFailed]);
 
   useEffect(() => {
-    void loadMembers();
+    queueMicrotask(() => {
+      void loadMembers();
+    });
   }, [loadMembers]);
 
   useEffect(() => {
-    setFeedback(null);
-    setError(null);
-    setRoleDrafts({});
-    setAddEmail("");
-    setAddRole("member");
-    setTransferOpened(false);
-    setNewOwnerUserId(null);
+    queueMicrotask(() => {
+      setFeedback(null);
+      setError(null);
+      setRoleDrafts({});
+      setAddEmail("");
+      setAddRole("member");
+      setTransferOpened(false);
+      setNewOwnerUserId(null);
+    });
   }, [currentWorkspace?.id]);
 
   const transferableMembers = useMemo(

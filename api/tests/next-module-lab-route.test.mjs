@@ -185,7 +185,7 @@ await runCase("module-lab Next proxy requires an explicit workspace by default",
   assert.equal(response.status, 400);
   assert.deepEqual(await readJson(response), {
     error: "workspace_required",
-    message: "A workspaceId is required when workspace RBAC strict mode is enabled.",
+    message: "A workspaceId is required for authenticated module-lab requests.",
   });
 });
 

@@ -20,9 +20,8 @@ await runCase("workspace-files member defaults do not include delete", async () 
   ]);
 });
 
-await runCase("strict workspace RBAC does not grant legacy capabilities without workspace", async () => {
+await runCase("workspace RBAC does not grant legacy capabilities without workspace", async () => {
   const services = {
-    workspaceRbacStrict: true,
     async getUserModuleRole() {
       return "operator";
     },
@@ -43,9 +42,8 @@ await runCase("strict workspace RBAC does not grant legacy capabilities without 
   });
 });
 
-await runCase("strict workspace RBAC does not fall back to global module role when workspace membership is unavailable", async () => {
+await runCase("workspace RBAC does not fall back to global module role when workspace membership is unavailable", async () => {
   const services = {
-    workspaceRbacStrict: true,
     async getUserModuleRole() {
       return "operator";
     },
@@ -72,9 +70,8 @@ await runCase("strict workspace RBAC does not fall back to global module role wh
   });
 });
 
-await runCase("workspace module role adds capabilities on top of baseline membership", async () => {
+await runCase("workspace module role grants module-lab capabilities after baseline membership", async () => {
   const services = {
-    workspaceRbacStrict: true,
     async getWorkspaceMembershipRole({ workspaceId, userId }) {
       assert.equal(workspaceId, "workspace-1");
       assert.equal(userId, "user-123");
@@ -103,11 +100,10 @@ await runCase("workspace module role adds capabilities on top of baseline member
   });
 });
 
-await runCase("workspace membership baseline remains when workspace module role is absent", async () => {
+await runCase("module-lab membership baseline has no capabilities when module role is absent", async () => {
   const services = {
-    workspaceRbacStrict: true,
     async getUserModuleRole() {
-      throw new Error("Strict workspace access must not read global module roles.");
+      throw new Error("Workspace access must not read global module roles.");
     },
     async getWorkspaceMembershipRole() {
       return "member";
@@ -128,6 +124,6 @@ await runCase("workspace membership baseline remains when workspace module role 
     workspaceId: "workspace-1",
     membershipRole: "member",
     moduleRole: null,
-    capabilities: ["module-lab.read"],
+    capabilities: [],
   });
 });

@@ -22,23 +22,22 @@ Completed baseline already in the repo:
 - `WorkspaceMembersCard` already lists/adds/updates/removes members and transfers ownership for the currently selected shared workspace.
 - Backend member-management routes already enforce owner-only mutations for shared workspaces.
 - ModuleLab runtime checks already support workspace-scoped access when a `bbb`/`workspaceId` is supplied.
+- Task 8 is complete: `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict` runtime support was removed, ModuleLab API requests now always require workspace context, and shared workspaces now expose ModuleLab access management backed by `workspace_module_roles`.
+- Task 9 is complete: authenticated app ModuleLab links preserve `bbb=<currentWorkspaceId>` while public/marketing ModuleLab links remain bare.
 
 Still pending for this feature:
 
-- Tasks 1-10 below have not been implemented yet.
+- Tasks 1-7 and 10 below have not been implemented yet.
 - No `APP_ADMIN_EMAILS`, `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
 - A personal-workspace overview table for the first 10 workspaces where the signed-in user is `owner`, `admin`, or `member`.
 - A row-level link from that overview into the selected workspace details/management surface.
-- A workspace-scoped ModuleLab access editor backed by `workspace_module_roles`.
-- App navigation still needs to link ModuleLab as `/<locale>/module-lab?bbb=<currentWorkspaceId>` from authenticated workspace context instead of using a bare ModuleLab URL.
-- Runtime code still mentions `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict`; remove that switch and behave as though workspace RBAC is always strict.
 - A deliberate manual-testing admin model and seed/setup path.
 - Backend/API permissions for the manual-testing admin to inspect/change workspace memberships and ModuleLab roles without being the workspace owner.
 - UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
 
 Next recommended step:
 
-- Start at Tasks 8 and 9 to add normal workspace ModuleLab access management and make authenticated ModuleLab links preserve `bbb`.
+- Start at Task 5 to add the personal-workspace overview table, then continue with the app-admin helper/API/UI tasks.
 
 ## Recommended approach
 
@@ -397,6 +396,8 @@ npm run typecheck
 
 ### Task 8: Remove `WORKSPACE_RBAC_STRICT` compatibility and add normal workspace ModuleLab access APIs/UI
 
+Status: **done**.
+
 **Objective:** Make workspace RBAC unconditional and let workspace owners/admins manage ModuleLab access inside the selected workspace.
 
 **Files:**
@@ -426,16 +427,16 @@ npm run typecheck
 **Verification:**
 
 ```bash
-npm run test:api:workspace-rbac-strict
-npm run test:api:workspace-module-roles
-npm run test:api:next-proxy:workspace-module-roles
+npm run test:api:workspace-rbac
+npm run test:api:modules
 npm run test:api:next-proxy:module-lab
-npm run test:e2e:auth
-npm run lint
+npm run test:api:all
 npm run typecheck
 ```
 
 ### Task 9: Make authenticated ModuleLab links workspace-aware
+
+Status: **done**.
 
 **Objective:** Ensure app navigation and workspace entry points link to the ModuleLab instance for the current workspace.
 

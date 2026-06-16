@@ -124,13 +124,12 @@ await runCase("strict ownership transfer uses transactional RPC", async () => {
       return { data: null, error: null };
     },
     from() {
-      throw new Error("Strict ownership transfer should not use table upsert.");
+      throw new Error("Ownership transfer should not use table upsert.");
     },
   };
 
   const services = createApiServices({
     ...testConfig,
-    workspaceRbacStrict: true,
   }, {
     adminClient,
     publicClient: adminClient,
