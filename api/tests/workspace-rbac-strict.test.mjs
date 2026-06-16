@@ -1,0 +1,133 @@
+import assert from "node:assert/strict";
+
+import { getUserWorkspaceModuleAccess } from "../core/authz/module-access.mjs";
+import { resolveDefaultWorkspaceMembershipCapabilities } from "../../src/shared/modules/module-capabilities.mjs";
+
+async function runCase(name, fn) {
+  try {
+    await fn();
+    console.log(`ok - ${name}`);
+  } catch (error) {
+    console.error(`not ok - ${name}`);
+    throw error;
+  }
+}
+
+await runCase("workspace-files member defaults do not include delete", async () => {
+  assert.deepEqual(resolveDefaultWorkspaceMembershipCapabilities("workspace-files", "member"), [
+    "workspace-files.read",
+    "workspace-files.upload",
+  ]);
+});
+
+await runCase("strict workspace RBAC does not grant legacy capabilities without workspace", async () => {
+  const services = {
+    workspaceRbacStrict: true,
+    async getUserModuleRole() {
+      return "operator";
+    },
+  };
+
+  const access = await getUserWorkspaceModuleAccess({
+    services,
+    userId: "user-123",
+    workspaceId: null,
+    moduleId: "workspace-files",
+  });
+
+  assert.deepEqual(access, {
+    workspaceId: null,
+    membershipRole: null,
+    moduleRole: null,
+    capabilities: [],
+  });
+});
+
+await runCase("strict workspace RBAC does not fall back to global module role when workspace membership is unavailable", async () => {
+  const services = {
+    workspaceRbacStrict: true,
+    async getUserModuleRole() {
+      return "operator";
+    },
+    async getWorkspaceMembershipRole() {
+      return null;
+    },
+    async getUserWorkspaceModuleRole() {
+      return "operator";
+    },
+  };
+
+  const access = await getUserWorkspaceModuleAccess({
+    services,
+    userId: "user-123",
+    workspaceId: "workspace-1",
+    moduleId: "module-lab",
+  });
+
+  assert.deepEqual(access, {
+    workspaceId: "workspace-1",
+    membershipRole: null,
+    moduleRole: null,
+    capabilities: [],
+  });
+});
+
+await runCase("workspace module role adds capabilities on top of baseline membership", async () => {
+  const services = {
+    workspaceRbacStrict: true,
+    async getWorkspaceMembershipRole({ workspaceId, userId }) {
+      assert.equal(workspaceId, "workspace-1");
+      assert.equal(userId, "user-123");
+      return "member";
+    },
+    async getUserWorkspaceModuleRole({ workspaceId, userId, moduleId }) {
+      assert.equal(workspaceId, "workspace-1");
+      assert.equal(userId, "user-123");
+      assert.equal(moduleId, "module-lab");
+      return "operator";
+    },
+  };
+
+  const access = await getUserWorkspaceModuleAccess({
+    services,
+    userId: "user-123",
+    workspaceId: "workspace-1",
+    moduleId: "module-lab",
+  });
+
+  assert.deepEqual(access, {
+    workspaceId: "workspace-1",
+    membershipRole: "member",
+    moduleRole: "operator",
+    capabilities: ["module-lab.read", "module-lab.run_job"],
+  });
+});
+
+await runCase("workspace membership baseline remains when workspace module role is absent", async () => {
+  const services = {
+    workspaceRbacStrict: true,
+    async getUserModuleRole() {
+      throw new Error("Strict workspace access must not read global module roles.");
+    },
+    async getWorkspaceMembershipRole() {
+      return "member";
+    },
+    async getUserWorkspaceModuleRole() {
+      return null;
+    },
+  };
+
+  const access = await getUserWorkspaceModuleAccess({
+    services,
+    userId: "user-123",
+    workspaceId: "workspace-1",
+    moduleId: "module-lab",
+  });
+
+  assert.deepEqual(access, {
+    workspaceId: "workspace-1",
+    membershipRole: "member",
+    moduleRole: null,
+    capabilities: ["module-lab.read"],
+  });
+});
