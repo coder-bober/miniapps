@@ -2,7 +2,7 @@
 
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
-**Goal:** Add a workspace access administration surface where regular users can review/manage workspaces they belong to, and where an explicitly configured manual-testing admin account can adjust workspace membership roles across users.
+**Goal:** Add a workspace access administration surface where regular users can review/manage workspaces they belong to, manage workspace-scoped ModuleLab access rights, and where an explicitly configured manual-testing admin account can adjust workspace membership and module roles across users.
 
 **Architecture:** Build on the existing workspace model and member-management APIs instead of creating a separate authorization model. The normal product flow remains workspace-owner scoped. A narrowly scoped, env-gated test-admin capability adds manual-testing powers without making every owner path depend on super-admin logic.
 
@@ -21,20 +21,24 @@ Completed baseline already in the repo:
 - `WorkspaceShellProvider` already keeps the current workspace and `bbb` query selection in sync.
 - `WorkspaceMembersCard` already lists/adds/updates/removes members and transfers ownership for the currently selected shared workspace.
 - Backend member-management routes already enforce owner-only mutations for shared workspaces.
+- ModuleLab runtime checks already support workspace-scoped access when a `bbb`/`workspaceId` is supplied.
 
 Still pending for this feature:
 
-- Tasks 1-8 below have not been implemented yet.
+- Tasks 1-10 below have not been implemented yet.
 - No `APP_ADMIN_EMAILS`, `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
 - A personal-workspace overview table for the first 10 workspaces where the signed-in user is `owner`, `admin`, or `member`.
 - A row-level link from that overview into the selected workspace details/management surface.
+- A workspace-scoped ModuleLab access editor backed by `workspace_module_roles`.
+- App navigation still needs to link ModuleLab as `/<locale>/module-lab?bbb=<currentWorkspaceId>` from authenticated workspace context instead of using a bare ModuleLab URL.
+- Runtime code still mentions `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict`; remove that switch and behave as though workspace RBAC is always strict.
 - A deliberate manual-testing admin model and seed/setup path.
-- Backend/API permissions for the manual-testing admin to inspect/change roles without being the workspace owner.
+- Backend/API permissions for the manual-testing admin to inspect/change workspace memberships and ModuleLab roles without being the workspace owner.
 - UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
 
 Next recommended step:
 
-- Start at Task 1 to add the app-admin helper and tests before adding routes or UI.
+- Start at Tasks 8 and 9 to add normal workspace ModuleLab access management and make authenticated ModuleLab links preserve `bbb`.
 
 ## Recommended approach
 
@@ -42,8 +46,8 @@ Next recommended step:
 
 For normal users, use the existing model:
 
-- `owner`: can manage members and transfer ownership in shared workspaces.
-- `admin`: can access the workspace and see details; do not grant member-management mutations yet unless a future requirement says so.
+- `owner`: can manage members, transfer ownership, and manage ModuleLab access in shared workspaces.
+- `admin`: can access the workspace, see details, and manage ModuleLab access.
 - `member`: can access workspace details in read-only mode.
 
 This avoids introducing global admin behavior into the normal product path.
@@ -69,7 +73,59 @@ Behavior:
 
 Do not create a separate route before it is needed. The current shell already supports selecting a workspace via `bbb`, and using it avoids duplicate workspace-detail state.
 
-### 3. Add optional manual-testing admin as an explicit app-admin capability
+### 3. Add workspace-scoped ModuleLab access management
+
+ModuleLab must be tied to the selected workspace.
+
+Current bug to fix:
+
+- authenticated app navigation can point to a bare `/<locale>/module-lab` URL
+- that disconnects ModuleLab from the current workspace
+- the page/API can only enforce the intended workspace access model when `bbb=<workspaceId>` is present
+- runtime code still contains a `WORKSPACE_RBAC_STRICT=false` compatibility path, but the target model has no compatibility mode
+
+Target behavior:
+
+- authenticated app navigation links to `/<locale>/module-lab?bbb=<currentWorkspaceId>`
+- public/marketing links may remain `/<locale>/module-lab`
+- `WORKSPACE_RBAC_STRICT` is removed from config, services, routes, and tests
+- missing workspace context is always rejected for authenticated ModuleLab API/status/job requests
+- every workspace has its own ModuleLab access assignments in `workspace_module_roles`
+- a workspace member with no explicit `module-lab` role row has no ModuleLab access
+- valid ModuleLab access options are:
+  - no access: no `workspace_module_roles` row
+  - `viewer`: `module-lab.read`
+  - `operator`: `module-lab.read` and `module-lab.run_job`
+
+Normal workspace UI:
+
+- show ModuleLab access beside the existing workspace member list for shared workspaces
+- allow workspace `owner` and `admin` to set each non-owner member to no access, `viewer`, or `operator`
+- allow `owner` and `admin` to set their own ModuleLab role too; workspace ownership remains governed by membership rules, not ModuleLab roles
+- show read-only ModuleLab access state to plain `member` users
+- when a member is removed from the workspace, their `module-lab` role row should be deleted or become unreachable through membership checks
+
+API shape:
+
+- add normal owner/admin-scoped module-role routes instead of overloading member-role routes:
+  - `GET /v1/workspaces/:workspaceId/module-roles/module-lab`
+  - `PATCH /v1/workspaces/:workspaceId/module-roles/module-lab/:userId`
+  - `DELETE /v1/workspaces/:workspaceId/module-roles/module-lab/:userId`
+- mirror those through Next proxy routes under `/api/workspaces/...`
+- `PATCH` accepts only `viewer` or `operator`
+- `DELETE` removes the row and means no ModuleLab access
+- routes must verify the actor is a workspace `owner` or `admin`
+- target user must be a current member of the workspace
+
+Strict RBAC cleanup:
+
+- remove `workspaceRbacStrict` from `api/config.mjs` and service construction
+- remove `process.env.WORKSPACE_RBAC_STRICT` checks from Next proxy code
+- remove `request.server.services.workspaceRbacStrict` branches from Fastify routes
+- update tests so they assert unconditional workspace-required behavior instead of strict-mode behavior
+- keep historical changelog entries as historical records, but do not add new docs that suggest the flag is still supported
+
+### 4. Add optional manual-testing admin as an explicit app-admin capability
 
 Requirement 2 is different from normal workspace ownership. A special admin account that can assign/change roles for arbitrary users is a super-admin/testing capability.
 
@@ -94,15 +150,18 @@ Future hardening, if this becomes product-grade:
 - add audit log rows for every membership/module-role mutation;
 - add confirmation modals and stronger CSRF/intent checks for destructive changes.
 
-### 4. Add app-admin API surface separately from owner member-management routes
+### 5. Add app-admin API surface separately from owner/admin workspace routes
 
-Do **not** overload existing owner-scoped endpoints too much. Add explicit internal API routes whose names make super-admin behavior obvious:
+Do **not** overload existing owner/admin-scoped endpoints too much. Add explicit internal API routes whose names make super-admin behavior obvious:
 
 Fastify:
 
 - `GET /v1/admin/workspaces?limit=10&query=...`
 - `GET /v1/admin/workspaces/:workspaceId/members`
 - `PATCH /v1/admin/workspaces/:workspaceId/members/:userId`
+- `GET /v1/admin/workspaces/:workspaceId/module-roles/module-lab`
+- `PATCH /v1/admin/workspaces/:workspaceId/module-roles/module-lab/:userId`
+- `DELETE /v1/admin/workspaces/:workspaceId/module-roles/module-lab/:userId`
 - optional later: `POST /v1/admin/workspaces/:workspaceId/members` by email
 
 Next proxy:
@@ -110,19 +169,22 @@ Next proxy:
 - `GET /api/admin/workspaces`
 - `GET /api/admin/workspaces/[workspaceId]/members`
 - `PATCH /api/admin/workspaces/[workspaceId]/members/[userId]`
+- `GET /api/admin/workspaces/[workspaceId]/module-roles/module-lab`
+- `PATCH /api/admin/workspaces/[workspaceId]/module-roles/module-lab/[userId]`
+- `DELETE /api/admin/workspaces/[workspaceId]/module-roles/module-lab/[userId]`
 
 The handler should check `isAppAdmin(authenticatedUser.email)` before touching Supabase service methods. Return stable `403 app_admin_required` when denied.
 
-For the first slice, support only role changes for existing workspace members. Adding arbitrary users can come after role editing is safe.
+For the first slice, support only membership role changes and ModuleLab role changes for existing workspace members. Adding arbitrary users can come after role editing is safe.
 
-### 5. UI placement for the special admin account
+### 6. UI placement for the special admin account
 
 Add an app-admin-only section to the same personal workspace overview card:
 
 - If `currentWorkspace.kind === "personal"` and user is app admin:
   - show an "Admin testing tools" subsection;
   - list first 10 workspaces globally or provide a simple workspace id/email lookup;
-  - link to an admin member-management view.
+  - link to an admin member-management and ModuleLab access view.
 
 Keep visual copy explicit:
 
@@ -171,14 +233,19 @@ npm run test:api:app-admin-access
 listAdminWorkspaces({ limit = 10 })
 listAdminWorkspaceMembers({ workspaceId })
 updateAdminWorkspaceMemberRole({ workspaceId, targetUserId, role })
+listAdminWorkspaceModuleRoles({ workspaceId, moduleId })
+updateAdminWorkspaceModuleRole({ workspaceId, targetUserId, moduleId, role })
+deleteAdminWorkspaceModuleRole({ workspaceId, targetUserId, moduleId })
 ```
 
 **Rules:**
 
 - `limit` defaults to 10 and clamps to a small max such as 50.
 - Role update can only set `admin` or `member` in the first slice.
+- Module role update can only set `module-lab` to `viewer` or `operator` in the first slice.
 - Do not allow setting `owner` here; keep ownership transfer explicit and transactional.
 - Do not delete memberships in this first admin slice.
+- Deleting a ModuleLab role row is allowed and means no ModuleLab access.
 
 **Verification:**
 
@@ -201,6 +268,9 @@ npm run test:api:admin-workspace-service
 - `GET /v1/admin/workspaces`
 - `GET /v1/admin/workspaces/:workspaceId/members`
 - `PATCH /v1/admin/workspaces/:workspaceId/members/:userId`
+- `GET /v1/admin/workspaces/:workspaceId/module-roles/module-lab`
+- `PATCH /v1/admin/workspaces/:workspaceId/module-roles/module-lab/:userId`
+- `DELETE /v1/admin/workspaces/:workspaceId/module-roles/module-lab/:userId`
 
 **Expected behavior:**
 
@@ -226,6 +296,10 @@ npm run test:api:admin-workspace-routes
 - Create: `src/app/api/admin/workspaces/[workspaceId]/members/route.ts`
 - Create: `src/app/api/admin/workspaces/[workspaceId]/members/[userId]/route-handlers.mjs`
 - Create: `src/app/api/admin/workspaces/[workspaceId]/members/[userId]/route.ts`
+- Create: `src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/route-handlers.mjs`
+- Create: `src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/route.ts`
+- Create: `src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/[userId]/route-handlers.mjs`
+- Create: `src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/[userId]/route.ts`
 - Test: `api/tests/next-admin-workspace-routes.test.mjs`
 
 **Verification:**
@@ -278,7 +352,9 @@ npm run test:e2e:auth
 - Show only on the personal workspace page.
 - List first 10 admin-visible workspaces from `/api/admin/workspaces`.
 - Link/select a workspace to load members from `/api/admin/workspaces/:workspaceId/members`.
+- Load ModuleLab roles from `/api/admin/workspaces/:workspaceId/module-roles/module-lab`.
 - Allow changing non-owner member roles between `admin` and `member`.
+- Allow changing ModuleLab access for current workspace members between no access, `viewer`, and `operator`.
 - Keep owner changes out of this UI for the first slice.
 
 **Verification:**
@@ -319,7 +395,72 @@ npm run lint
 npm run typecheck
 ```
 
-### Task 8: Add browser regression coverage
+### Task 8: Remove `WORKSPACE_RBAC_STRICT` compatibility and add normal workspace ModuleLab access APIs/UI
+
+**Objective:** Make workspace RBAC unconditional and let workspace owners/admins manage ModuleLab access inside the selected workspace.
+
+**Files:**
+
+- Modify: `src/shared/api/workspaces.mjs`
+- Modify: `api/services/supabase.mjs`
+- Modify: `api/routes/workspaces.mjs`
+- Modify: `api/config.mjs`
+- Modify: `api/modules/module-lab/routes/module-lab.mjs`
+- Modify: `src/app/api/module-lab/route-handlers.mjs`
+- Create: Next proxy routes under `src/app/api/workspaces/[workspaceId]/module-roles/module-lab/...`
+- Create: `src/modules/workspaces/components/workspace-module-lab-access-card.tsx`
+- Modify: `src/app/[locale]/(app)/workspace/page.tsx`
+- Modify: `src/lib/i18n/dictionaries.ts`
+
+**Behavior:**
+
+- Remove `WORKSPACE_RBAC_STRICT` and `workspaceRbacStrict`; there is no env opt-out.
+- ModuleLab authenticated API/status/job requests without workspace context always return `workspace_required`.
+- Render on selected shared workspaces.
+- Load workspace members and their `module-lab` role rows.
+- Show ModuleLab access as no access, `viewer`, or `operator`.
+- Allow workspace `owner` and `admin` to update/remove ModuleLab access.
+- Plain `member` users see a read-only ModuleLab access state.
+- Target users must already be members of the workspace.
+
+**Verification:**
+
+```bash
+npm run test:api:workspace-rbac-strict
+npm run test:api:workspace-module-roles
+npm run test:api:next-proxy:workspace-module-roles
+npm run test:api:next-proxy:module-lab
+npm run test:e2e:auth
+npm run lint
+npm run typecheck
+```
+
+### Task 9: Make authenticated ModuleLab links workspace-aware
+
+**Objective:** Ensure app navigation and workspace entry points link to the ModuleLab instance for the current workspace.
+
+**Files:**
+
+- Modify: app navigation/module navigation helpers as needed
+- Modify: `src/modules/module-lab/manifest.ts` only if the manifest needs an app-link resolver
+- Test: browser/source test for app ModuleLab href generation
+
+**Behavior:**
+
+- Authenticated app navigation uses `/${locale}/module-lab?bbb=<currentWorkspaceId>`.
+- Marketing/public navigation remains `/${locale}/module-lab`.
+- ModuleLab card/API calls keep forwarding `bbb` to `/api/module-lab`.
+
+**Verification:**
+
+```bash
+npm run test:e2e:module-lab
+npm run test:e2e:combined
+npm run lint
+npm run typecheck
+```
+
+### Task 10: Add browser regression coverage
 
 **Objective:** Prove the normal and app-admin flows work end-to-end.
 
@@ -334,6 +475,9 @@ npm run typecheck
 2. Owner can open a shared workspace from the table and manage members with existing owner controls.
 3. Non-admin does not see manual-testing admin tools.
 4. Configured app-admin sees admin tools and can change a member role for a seeded workspace.
+5. Owner/admin can change a member's ModuleLab access from no access to `viewer` and `operator`.
+6. A member with no ModuleLab role sees the restricted ModuleLab state for that workspace.
+7. App ModuleLab navigation preserves `bbb=<workspaceId>`.
 
 **Verification:**
 
@@ -350,10 +494,11 @@ npm run typecheck
 - Treat the special admin account as a dev/manual-testing feature until audit logging exists.
 - Keep admin capability server-side and explicit (`APP_ADMIN_EMAILS` or later `app_admins` table).
 - Do not allow arbitrary ownership changes through the first app-admin UI; use existing owner transfer RPC or a separately reviewed admin transfer endpoint later.
+- Do not grant ModuleLab access from workspace membership alone; `workspace_module_roles` is the explicit access source for ModuleLab.
 - Keep route names explicit (`/admin/...`) so code review can distinguish normal owner-scoped behavior from test-admin behavior.
 
 ## Recommended first milestone
 
-Implement Tasks 1, 3, 4, and 5 first, but keep admin mutations read-only until the UI and tests are reviewed.
+Implement Tasks 8 and 9 first to fix the current ModuleLab workspace disconnect for normal users.
 
-Then implement role-change mutation as a second small milestone. This reduces risk because the normal personal-workspace overview can ship independently from super-admin mutation powers.
+Then implement Tasks 1, 3, 4, and 5, but keep app-admin mutations read-only until the UI and tests are reviewed. Add app-admin ModuleLab role mutation as the second admin milestone.

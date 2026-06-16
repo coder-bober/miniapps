@@ -66,6 +66,14 @@ That keeps one canonical SEO route while still allowing richer authenticated beh
 
 Only create a separate protected route when the module truly needs an app-only surface distinct from the public page.
 
+For modules with workspace-scoped authenticated controls, keep the public route canonical but pass workspace context through the query string. `module-lab` is the current example:
+
+- public/marketing link: `/<locale>/module-lab`
+- authenticated app link: `/<locale>/module-lab?bbb=<workspaceId>`
+- client API calls: `/api/module-lab?bbb=<workspaceId>`
+
+The bare public URL must not be treated as the authenticated workspace instance.
+
 ## SEO expectations
 
 Public module pages should provide:

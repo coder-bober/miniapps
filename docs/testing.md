@@ -95,6 +95,7 @@ Some browser suites depend on `ENABLED_MODULES`.
 - `workspace-files` tests run when `workspace-files` is included
 - `module-lab` tests run when `module-lab` is included
 - `module-lab-disabled` is the inverse smoke case
+- authenticated `module-lab` scenarios should use `?bbb=<workspaceId>` so the suite exercises workspace-scoped access rights
 
 The Playwright runners accept `--enabled-modules=...` and that value is intended to override the default env-file value for the run.
 

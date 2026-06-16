@@ -2,13 +2,13 @@
 
 ## Purpose
 
-`module-lab` is the first live example of module-scoped RBAC in this repo.
+`module-lab` is the first live example of workspace-scoped module RBAC in this repo. This document describes the required operational behavior for the workspace-scoped model.
 
 It is useful as:
 - a reference implementation for future modules like `blog`
 - a quick environment check that module roles, Next proxy checks, Fastify checks, and queue authorization all agree
 
-## Current roles
+## Required roles
 
 `module-lab` currently supports two roles:
 
@@ -19,11 +19,13 @@ It is useful as:
   - can read the authenticated diagnostics surface
   - can queue module jobs
 
-If a signed-in user has no `module-lab` role row, they:
+If a signed-in user has no `module-lab` role row for the requested workspace, they:
 - can still open the public `/[locale]/module-lab` page
 - cannot access the authenticated diagnostics surface
 
-## Current capabilities
+Workspace membership alone does not grant ModuleLab capabilities. ModuleLab access requires an explicit `workspace_module_roles` row for the selected workspace.
+
+## Required capabilities
 
 The role map currently resolves to:
 
@@ -54,6 +56,14 @@ For `module-lab`, typical values are:
   or
 - `role = 'operator'`
 
+Deleting the row means no ModuleLab access for that user in that workspace.
+
+Authenticated ModuleLab URLs should include the workspace context:
+
+- `/<locale>/module-lab?bbb=<workspace-id>`
+
+The bare `/<locale>/module-lab` URL is only valid for public/marketing content. It must not be used as the authenticated app navigation target.
+
 ## Expected behavior by user state
 
 Unsigned visitor:
@@ -61,7 +71,7 @@ Unsigned visitor:
 - SEO-visible public content is available
 - no authenticated diagnostics controls
 
-Signed-in user with no role:
+Signed-in user with no role for the requested workspace:
 - public page still renders
 - restricted note is shown
 - diagnostics list is hidden
@@ -84,8 +94,10 @@ The Next proxy and Fastify backend both enforce the same capability model.
 Current stable RBAC error:
 
 - `module_capability_required`
+- `workspace_required`
 
 Examples:
+- missing `bbb`/`workspaceId`
 - missing `module-lab.read`
 - missing `module-lab.run_job`
 
@@ -97,6 +109,10 @@ Examples:
 The dedicated browser suite now also checks direct proxy `403` behavior for:
 - `viewer` trying to queue a job
 - signed-in no-role user trying to load authenticated status
+
+When testing authenticated behavior, open ModuleLab with an explicit workspace:
+
+- `/en/module-lab?bbb=<workspace-id>`
 
 ## Troubleshooting
 
@@ -131,7 +147,7 @@ Useful commands:
 If a signed-in user gets:
 - `requiredCapability = module-lab.read`
   - the user is not a member of the requested workspace
-  - or the user has no valid workspace-scoped `module-lab` role row where operator capabilities are required
+  - or the user has no valid workspace-scoped `module-lab` role row
 - `requiredCapability = module-lab.run_job`
   - the user is a `viewer`
   - or otherwise lacks operator access
@@ -141,6 +157,15 @@ Verify the current assignment in `public.workspace_module_roles` for the request
 Expected valid roles for `module-lab`:
 - `viewer`
 - `operator`
+
+### Unexpected `workspace_required`
+
+If a signed-in user gets `workspace_required`, the request did not include a workspace context.
+
+Check:
+- app navigation should link to `/<locale>/module-lab?bbb=<currentWorkspaceId>`
+- ModuleLab client API calls should request `/api/module-lab?bbb=<workspaceId>`
+- Fastify requests should forward `workspaceId=<workspaceId>`
 
 ### Test suites and module state
 

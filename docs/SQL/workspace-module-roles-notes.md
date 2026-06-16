@@ -23,11 +23,18 @@ Examples:
 - a workspace member may have default read access to a module
 - an explicit module role can grant authoring/operator/publish capabilities
 
-## Migration relationship to `user_module_roles`
+`module-lab` is intentionally stricter:
 
-The current `user_module_roles` table is transitional.
+- workspace membership alone does not grant ModuleLab capabilities
+- `viewer` and `operator` must be explicit rows in `workspace_module_roles`
+- removing the row means no ModuleLab access in that workspace
+- this lets each workspace have its own independent ModuleLab access rights
 
-Migration rule:
+## Migration relationship to retired `user_module_roles`
+
+The old `user_module_roles` table was transitional and should not be used by active runtime paths.
+
+Migration rule for environments that still have legacy rows:
 - global module roles migrate only into the user’s personal workspace
 
 They should not be copied blindly into every shared workspace.

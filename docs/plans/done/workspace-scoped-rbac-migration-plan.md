@@ -14,7 +14,7 @@ Completed:
   - `src/core/authz/module-access.ts` exposes `getCurrentUserWorkspaceModuleAccess`.
   - `api/core/authz/module-access.mjs` exposes `getUserWorkspaceModuleAccess`.
 - `workspace-files` and `module-lab` consume workspace context/access in the current app.
-- Workspace RBAC strict behavior is now the default; `WORKSPACE_RBAC_STRICT=false` is the explicit migration/local opt-out.
+- Workspace RBAC strict behavior is now the required model; remaining source mentions of `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict` are cleanup targets tracked by the active workspace access administration plan.
 - Frontend/server and backend authz helpers no longer grant legacy compatibility capabilities.
 - Fresh-project bootstrap SQL no longer creates the legacy `user_module_roles` table, active runtime/fixture paths no longer query it, and `docs/SQL/retire-user-module-roles.sql` documents the explicit drop step for migrated environments.
 - `workspace-files` data access now uses `workspace_id` directly; the old retry helper for no-`workspace_id` workspace-file schemas has been removed.
@@ -33,7 +33,7 @@ These decisions define the finish line for this plan.
 
 1. **Workspace files are workspace-owned.** In a real workspace (`workspace_id` present), file list/read/delete authorization is based on membership in that workspace. The uploader `user_id` remains useful metadata and storage-key input, but must not be the access boundary for shared workspace files.
 2. **Default `workspace-files` capabilities differ by membership role.** `owner` and `admin` get `read`, `upload`, and `delete`. Plain `member` gets `read` and `upload`, but not `delete`.
-3. **Strict RBAC mode should exist.** Add a config/env switch such as `WORKSPACE_RBAC_STRICT=true`. In strict mode, runtime code must not silently fall back to `user_module_roles` or missing workspace tables. Compatibility mode can remain for migration/local bootstrap.
+3. **Strict RBAC should be unconditional.** Runtime code must not silently fall back to `user_module_roles` or missing workspace tables, and there should be no env opt-out.
 4. **Ownership transfer should move into a transactional database operation.** Keep the unique owner index, and add a Postgres/Supabase RPC for demoting the old owner and promoting the new owner in one operation.
 
 ## Clean finish implementation plan
@@ -43,7 +43,7 @@ These decisions define the finish line for this plan.
 3. Refactor workspace-file repository/service methods so `workspace_id` access is workspace-scoped; keep legacy `user_id + workspace_slug` only for compatibility paths.
 4. Add route tests for shared workspace visibility, non-member denial, and member delete denial.
 5. Add SQL/RPC plan or migration for transactional ownership transfer, then call it from the Supabase service.
-6. Gate legacy compatibility fallback in strict mode.
+6. Remove legacy compatibility fallback.
 7. Remove active `user_module_roles` runtime fallback and keep migration/retirement docs only.
 
 ## Goal
