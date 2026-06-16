@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { defaultLocale, isSupportedLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createAuthCallbackRedirectUrl } from "@/shared/auth/callback-redirect.mjs";
 
 function resolveLocaleFromPath(nextPath: string) {
   const firstSegment = nextPath.split("/").filter(Boolean)[0];
@@ -24,7 +25,12 @@ export async function GET(request: NextRequest) {
     : `/${locale}/sign-in?error=${encodeURIComponent(dictionary.auth.messages.confirmationExpired)}`;
 
   if (!code && !(tokenHash && type)) {
-    return NextResponse.redirect(new URL(failurePath, request.url));
+    return NextResponse.redirect(
+      createAuthCallbackRedirectUrl({
+        path: failurePath,
+        requestUrl: request.url,
+      }),
+    );
   }
 
   const supabase = await createSupabaseServerClient();
@@ -41,9 +47,17 @@ export async function GET(request: NextRequest) {
       : `/${locale}/sign-in?error=${encodeURIComponent(dictionary.auth.messages.confirmationFailed)}`;
 
     return NextResponse.redirect(
-      new URL(errorPath, request.url),
+      createAuthCallbackRedirectUrl({
+        path: errorPath,
+        requestUrl: request.url,
+      }),
     );
   }
 
-  return NextResponse.redirect(new URL(next, request.url));
+  return NextResponse.redirect(
+    createAuthCallbackRedirectUrl({
+      path: next,
+      requestUrl: request.url,
+    }),
+  );
 }
