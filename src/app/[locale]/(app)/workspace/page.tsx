@@ -7,6 +7,7 @@ import {
 import { CoreAppPageShell } from "@/core/pages/core-app-page-shell";
 import { isModuleEnabled } from "@/shared/modules/enabled-modules";
 import { WorkspaceFilesCard } from "@/modules/workspace-files/components/workspace-files-card";
+import { WorkspaceAccessOverviewCard } from "@/modules/workspaces/components/workspace-access-overview-card";
 import { WorkspaceMembersCard } from "@/modules/workspaces/components/workspace-members-card";
 import { WorkspaceModuleLabAccessCard } from "@/modules/workspaces/components/workspace-module-lab-access-card";
 
@@ -47,6 +48,11 @@ export default async function WorkspacePage({ params }: PageProps) {
           highlights: dictionary.app.workspace.highlights,
         }}
       >
+        <WorkspaceAccessOverviewCard
+          dictionary={dictionary.app.workspace}
+          sharedDictionary={dictionary.app.shared}
+          locale={locale}
+        />
         <WorkspaceMembersCard
           dictionary={dictionary.app.workspace}
           sharedDictionary={dictionary.app.shared}

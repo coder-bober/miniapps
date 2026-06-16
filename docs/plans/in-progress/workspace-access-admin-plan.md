@@ -22,22 +22,21 @@ Completed baseline already in the repo:
 - `WorkspaceMembersCard` already lists/adds/updates/removes members and transfers ownership for the currently selected shared workspace.
 - Backend member-management routes already enforce owner-only mutations for shared workspaces.
 - ModuleLab runtime checks already support workspace-scoped access when a `bbb`/`workspaceId` is supplied.
+- Task 5 is complete: the personal workspace page now shows a first-10 workspace access overview with row links that preserve `bbb`.
 - Task 8 is complete: `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict` runtime support was removed, ModuleLab API requests now always require workspace context, and shared workspaces now expose ModuleLab access management backed by `workspace_module_roles`.
 - Task 9 is complete: authenticated app ModuleLab links preserve `bbb=<currentWorkspaceId>` while public/marketing ModuleLab links remain bare.
 
 Still pending for this feature:
 
-- Tasks 1-7 and 10 below have not been implemented yet.
+- Tasks 1-4, 6-7, and 10 below have not been implemented yet.
 - No `APP_ADMIN_EMAILS`, `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
-- A personal-workspace overview table for the first 10 workspaces where the signed-in user is `owner`, `admin`, or `member`.
-- A row-level link from that overview into the selected workspace details/management surface.
 - A deliberate manual-testing admin model and seed/setup path.
 - Backend/API permissions for the manual-testing admin to inspect/change workspace memberships and ModuleLab roles without being the workspace owner.
 - UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
 
 Next recommended step:
 
-- Start at Task 5 to add the personal-workspace overview table, then continue with the app-admin helper/API/UI tasks.
+- Start at Task 1 to add the app-admin allowlist helper and tests, then continue with app-admin service/API/UI tasks.
 
 ## Recommended approach
 
@@ -308,6 +307,8 @@ npm run test:api:next-proxy:admin-workspaces
 ```
 
 ### Task 5: Add personal-workspace overview card for the signed-in user's first 10 workspaces
+
+Status: **done**.
 
 **Objective:** Add the normal-user workspace overview requested in item 1.
 

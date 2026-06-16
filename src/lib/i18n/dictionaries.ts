@@ -151,6 +151,15 @@ export type SiteDictionary = {
       moduleLabAccessLoadFailed: string;
       moduleLabAccessUpdateSuccess: string;
       moduleLabAccessUpdateFailed: string;
+      workspaceAccessTitle: string;
+      workspaceAccessDescription: string;
+      workspaceAccessNameColumn: string;
+      workspaceAccessKindColumn: string;
+      workspaceAccessRoleColumn: string;
+      workspaceAccessActionColumn: string;
+      workspaceAccessOpenAction: string;
+      workspaceAccessPersonalOnlyNotice: string;
+      workspaceAccessEmpty: string;
       workspacesLabel: string;
       workspacesHint: string;
       workspacesLoadFailed: string;
@@ -463,6 +472,17 @@ const en: SiteDictionary = {
       moduleLabAccessLoadFailed: "We could not load ModuleLab access. Try again.",
       moduleLabAccessUpdateSuccess: "ModuleLab access was updated.",
       moduleLabAccessUpdateFailed: "We could not update ModuleLab access. Try again.",
+      workspaceAccessTitle: "Workspace access",
+      workspaceAccessDescription:
+        "Review the first workspaces you belong to and open the selected workspace context.",
+      workspaceAccessNameColumn: "Workspace",
+      workspaceAccessKindColumn: "Kind",
+      workspaceAccessRoleColumn: "Your role",
+      workspaceAccessActionColumn: "Action",
+      workspaceAccessOpenAction: "Open",
+      workspaceAccessPersonalOnlyNotice:
+        "This overview is shown from your personal workspace so you can jump into shared workspace contexts.",
+      workspaceAccessEmpty: "Your personal workspace is the only workspace so far.",
       workspacesLabel: "Workspace",
       workspacesHint: "Switch between your personal and shared workspaces.",
       workspacesLoadFailed: "We could not load the available workspaces. Try again.",
@@ -836,6 +856,17 @@ const ru: SiteDictionary = {
       moduleLabAccessLoadFailed: "Не удалось загрузить доступ к ModuleLab. Попробуйте еще раз.",
       moduleLabAccessUpdateSuccess: "Доступ к ModuleLab обновлен.",
       moduleLabAccessUpdateFailed: "Не удалось обновить доступ к ModuleLab. Попробуйте еще раз.",
+      workspaceAccessTitle: "Доступ к рабочим пространствам",
+      workspaceAccessDescription:
+        "Просмотрите первые рабочие пространства, где вы состоите, и откройте выбранный контекст.",
+      workspaceAccessNameColumn: "Рабочее пространство",
+      workspaceAccessKindColumn: "Тип",
+      workspaceAccessRoleColumn: "Ваша роль",
+      workspaceAccessActionColumn: "Действие",
+      workspaceAccessOpenAction: "Открыть",
+      workspaceAccessPersonalOnlyNotice:
+        "Этот обзор показан в личном рабочем пространстве, чтобы быстро перейти в общие контексты.",
+      workspaceAccessEmpty: "Пока доступно только ваше личное рабочее пространство.",
       workspacesLabel: "Рабочее пространство",
       workspacesHint: "Переключайтесь между личным и общими рабочими пространствами.",
       workspacesLoadFailed: "Не удалось загрузить доступные рабочие пространства. Попробуйте еще раз.",

@@ -1,5 +1,10 @@
 # Changelog
 
+## Workspace access overview
+
+- Added a personal-workspace access overview listing the first workspaces the signed-in user belongs to.
+- Workspace overview rows link back to `/workspace` with `bbb=<workspaceId>` so users can jump into shared workspace contexts.
+
 ## ModuleLab workspace access management
 
 - Removed the `WORKSPACE_RBAC_STRICT` runtime opt-out; workspace RBAC now behaves as always strict.
