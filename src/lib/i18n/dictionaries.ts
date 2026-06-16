@@ -160,6 +160,15 @@ export type SiteDictionary = {
       workspaceAccessOpenAction: string;
       workspaceAccessPersonalOnlyNotice: string;
       workspaceAccessEmpty: string;
+      adminWorkspaceToolsTitle: string;
+      adminWorkspaceToolsDescription: string;
+      adminWorkspaceSelectLabel: string;
+      adminWorkspaceRefresh: string;
+      adminWorkspaceLoading: string;
+      adminWorkspaceMembersEmpty: string;
+      adminWorkspaceLoadFailed: string;
+      adminWorkspaceUpdateSuccess: string;
+      adminWorkspaceUpdateFailed: string;
       workspacesLabel: string;
       workspacesHint: string;
       workspacesLoadFailed: string;
@@ -483,6 +492,16 @@ const en: SiteDictionary = {
       workspaceAccessPersonalOnlyNotice:
         "This overview is shown from your personal workspace so you can jump into shared workspace contexts.",
       workspaceAccessEmpty: "Your personal workspace is the only workspace so far.",
+      adminWorkspaceToolsTitle: "Admin testing tools",
+      adminWorkspaceToolsDescription:
+        "Manual testing admin tools. This section is visible only to configured app-admin accounts.",
+      adminWorkspaceSelectLabel: "Workspace",
+      adminWorkspaceRefresh: "Refresh",
+      adminWorkspaceLoading: "Loading workspace access...",
+      adminWorkspaceMembersEmpty: "No members were found for this workspace.",
+      adminWorkspaceLoadFailed: "We could not load admin workspace access. Try again.",
+      adminWorkspaceUpdateSuccess: "Workspace access was updated.",
+      adminWorkspaceUpdateFailed: "We could not update workspace access. Try again.",
       workspacesLabel: "Workspace",
       workspacesHint: "Switch between your personal and shared workspaces.",
       workspacesLoadFailed: "We could not load the available workspaces. Try again.",
@@ -867,6 +886,16 @@ const ru: SiteDictionary = {
       workspaceAccessPersonalOnlyNotice:
         "Этот обзор показан в личном рабочем пространстве, чтобы быстро перейти в общие контексты.",
       workspaceAccessEmpty: "Пока доступно только ваше личное рабочее пространство.",
+      adminWorkspaceToolsTitle: "Инструменты администратора",
+      adminWorkspaceToolsDescription:
+        "Инструменты администратора для ручного тестирования. Раздел виден только настроенным app-admin аккаунтам.",
+      adminWorkspaceSelectLabel: "Рабочее пространство",
+      adminWorkspaceRefresh: "Обновить",
+      adminWorkspaceLoading: "Загрузка доступа к рабочему пространству...",
+      adminWorkspaceMembersEmpty: "У этого рабочего пространства нет участников.",
+      adminWorkspaceLoadFailed: "Не удалось загрузить администрирование доступа. Попробуйте еще раз.",
+      adminWorkspaceUpdateSuccess: "Доступ к рабочему пространству обновлен.",
+      adminWorkspaceUpdateFailed: "Не удалось обновить доступ к рабочему пространству. Попробуйте еще раз.",
       workspacesLabel: "Рабочее пространство",
       workspacesHint: "Переключайтесь между личным и общими рабочими пространствами.",
       workspacesLoadFailed: "Не удалось загрузить доступные рабочие пространства. Попробуйте еще раз.",

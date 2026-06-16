@@ -6,17 +6,20 @@ import Link from "next/link";
 import { useWorkspaceShellContext, type WorkspaceSummary } from "@/core/workspaces/workspace-shell-context";
 import type { Locale } from "@/lib/i18n/config";
 import type { SiteDictionary } from "@/lib/i18n/dictionaries";
+import { AdminWorkspaceAccessCard } from "./admin-workspace-access-card";
 
 type WorkspaceAccessOverviewCardProps = {
   dictionary: SiteDictionary["app"]["workspace"];
   sharedDictionary: SiteDictionary["app"]["shared"];
   locale: Locale;
+  isAppAdmin: boolean;
 };
 
 export function WorkspaceAccessOverviewCard({
   dictionary,
   sharedDictionary,
   locale,
+  isAppAdmin,
 }: WorkspaceAccessOverviewCardProps) {
   const { currentWorkspace, workspaces } = useWorkspaceShellContext();
 
@@ -90,6 +93,13 @@ export function WorkspaceAccessOverviewCard({
             </Table>
           </Table.ScrollContainer>
         )}
+
+        {isAppAdmin ? (
+          <AdminWorkspaceAccessCard
+            dictionary={dictionary}
+            sharedDictionary={sharedDictionary}
+          />
+        ) : null}
       </Stack>
     </Card>
   );

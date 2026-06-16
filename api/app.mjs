@@ -4,6 +4,7 @@ import multipart from "@fastify/multipart";
 import { registerApiModuleRoutes } from "./modules/registry.mjs";
 import { registerApiServicesPlugin } from "./plugins/services.mjs";
 import { registerAccountRoutes } from "./routes/account.mjs";
+import { registerAdminWorkspaceRoutes } from "./routes/admin-workspaces.mjs";
 import { registerHealthRoutes } from "./routes/health.mjs";
 import { registerWorkspaceRoutes } from "./routes/workspaces.mjs";
 
@@ -39,6 +40,7 @@ export function buildApiApp({ services }) {
 
   app.register(registerHealthRoutes);
   app.register(registerAccountRoutes);
+  app.register(registerAdminWorkspaceRoutes);
   app.register(registerWorkspaceRoutes);
   registerApiModuleRoutes(app);
 

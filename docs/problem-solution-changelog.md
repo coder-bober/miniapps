@@ -1,5 +1,29 @@
 # Important changes
 
+## App-admin workspace UI
+
+Problem: the app-admin API was available but there was no UI for a configured manual-testing admin to inspect or adjust workspace/member/ModuleLab access. The feature also needed setup guidance so enabling app-admin access did not depend on hidden local knowledge.
+
+Solution: added an app-admin-only section to the personal workspace overview, with server-computed app-admin visibility and client-side controls for the first global workspace slice. Added `docs/admin-testing.md` documenting `APP_ADMIN_EMAILS`, manual setup, and safety boundaries.
+
+## App-admin Next proxy routes
+
+Problem: the Fastify app-admin API was not reachable through the App Router proxy layer used by frontend code. Calling the backend directly from client/UI code would bypass the existing session-to-bearer forwarding pattern and duplicate error handling.
+
+Solution: added `/api/admin/workspaces...` proxy handlers and route wrappers that forward the current Supabase session token to the matching `/v1/admin/workspaces...` endpoints, validate success payloads, and preserve stable upstream app-admin denial/error responses.
+
+## App-admin Fastify routes
+
+Problem: the app-admin service methods were available internally but had no HTTP boundary that enforced the explicit manual-testing admin allowlist. Exposing the behavior through normal workspace routes would make broader admin powers hard to distinguish from owner/admin workspace permissions.
+
+Solution: added dedicated `/v1/admin/workspaces...` Fastify routes that authenticate the request, require the signed-in email to match `APP_ADMIN_EMAILS`, and then call only the app-admin service methods. Route tests cover denial before service calls, request validation, owner-protection mapping, and ModuleLab role operations.
+
+## App-admin workspace service foundation
+
+Problem: app-admin API routes need backend operations that are clearly separate from owner-scoped workspace management. Reusing owner/admin methods would either require fake actor memberships or blur normal workspace permissions with the manual-testing admin model.
+
+Solution: added explicit app-admin Supabase service methods for workspace inspection, member role changes, and ModuleLab role management. The first slice remains constrained to existing members, blocks owner role mutation, clamps workspace listing limits, and only allows `module-lab` viewer/operator role rows.
+
 ## App-admin allowlist foundation
 
 Problem: the workspace access administration plan needs a manual-testing admin account, but no shared contract existed for how `APP_ADMIN_EMAILS` should be parsed or matched. Adding routes before defining that behavior would make route tests duplicate allowlist rules.

@@ -26,18 +26,20 @@ Completed baseline already in the repo:
 - Task 8 is complete: `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict` runtime support was removed, ModuleLab API requests now always require workspace context, and shared workspaces now expose ModuleLab access management backed by `workspace_module_roles`.
 - Task 9 is complete: authenticated app ModuleLab links preserve `bbb=<currentWorkspaceId>` while public/marketing ModuleLab links remain bare.
 - Task 1 is complete: app-admin email allowlist parsing/checking now has shared helper coverage and runs in `test:api:all`.
+- Task 2 is complete: app-admin Supabase service methods can list workspaces/members and update existing non-owner workspace roles plus ModuleLab access rows.
+- Task 3 is complete: Fastify `/v1/admin/workspaces...` routes are guarded by the app-admin email allowlist and call the explicit app-admin service methods.
+- Task 4 is complete: Next `/api/admin/workspaces...` proxy routes mirror the Fastify app-admin API and preserve upstream app-admin denial/error payloads.
+- Task 6 is complete: the personal workspace overview now shows app-admin-only testing tools for global workspace/member inspection, member role edits, and ModuleLab access edits.
+- Task 7 is complete: `docs/admin-testing.md` documents `APP_ADMIN_EMAILS` setup and safety notes; no `.env.example` exists in this repo.
 
 Still pending for this feature:
 
-- Tasks 2-4, 6-7, and 10 below have not been implemented yet.
-- No `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
-- A deliberate manual-testing admin model and seed/setup path.
-- Backend/API permissions for the manual-testing admin to inspect/change workspace memberships and ModuleLab roles without being the workspace owner.
+- Task 10 below has not been implemented yet.
 - UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
 
 Next recommended step:
 
-- Start at Task 2 to add backend service methods for app-admin workspace inspection, then continue with explicit app-admin API/UI tasks.
+- Start at Task 10 to add focused e2e/source coverage for the app-admin UI behavior.
 
 ## Recommended approach
 
@@ -221,6 +223,8 @@ npm run test:api:app-admin-access
 
 ### Task 2: Add backend service methods for admin workspace inspection
 
+Status: **done**.
+
 **Objective:** Expose service-level read methods for app-admin workspace/member inspection.
 
 **Files:**
@@ -256,6 +260,8 @@ npm run test:api:admin-workspace-service
 
 ### Task 3: Add explicit Fastify app-admin routes
 
+Status: **done**.
+
 **Objective:** Add super-admin endpoints guarded by the app-admin email allowlist.
 
 **Files:**
@@ -286,6 +292,8 @@ npm run test:api:admin-workspace-routes
 ```
 
 ### Task 4: Add Next proxy routes for app-admin API
+
+Status: **done**.
 
 **Objective:** Make the admin APIs available to client components without exposing service-role keys.
 
@@ -341,6 +349,8 @@ npm run test:e2e:auth
 
 ### Task 6: Add admin-only testing tools UI
 
+Status: **done**.
+
 **Objective:** Give the configured admin account a UI to inspect/change roles for manual testing.
 
 **Files:**
@@ -369,6 +379,8 @@ npm run typecheck
 ```
 
 ### Task 7: Add manual-testing admin seed/setup documentation
+
+Status: **done**.
 
 **Objective:** Make the special admin account reproducible without hardcoding secrets into the app.
 

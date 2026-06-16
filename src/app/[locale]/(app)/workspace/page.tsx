@@ -10,6 +10,7 @@ import { WorkspaceFilesCard } from "@/modules/workspace-files/components/workspa
 import { WorkspaceAccessOverviewCard } from "@/modules/workspaces/components/workspace-access-overview-card";
 import { WorkspaceMembersCard } from "@/modules/workspaces/components/workspace-members-card";
 import { WorkspaceModuleLabAccessCard } from "@/modules/workspaces/components/workspace-module-lab-access-card";
+import { isAppAdminEmail } from "@/shared/admin/app-admin";
 
 type PageProps = {
   params: Promise<{
@@ -52,6 +53,7 @@ export default async function WorkspacePage({ params }: PageProps) {
           dictionary={dictionary.app.workspace}
           sharedDictionary={dictionary.app.shared}
           locale={locale}
+          isAppAdmin={isAppAdminEmail(user.email)}
         />
         <WorkspaceMembersCard
           dictionary={dictionary.app.workspace}

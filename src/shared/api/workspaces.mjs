@@ -13,6 +13,14 @@ export const workspaceSummarySchema = z.object({
   membershipRole: workspaceMembershipRoleSchema,
 });
 
+export const adminWorkspaceSummarySchema = workspaceSummarySchema.omit({
+  id: true,
+  membershipRole: true,
+}).extend({
+  id: workspaceIdSchema,
+  createdAt: z.string(),
+});
+
 export const workspaceMemberSummarySchema = z.object({
   membershipId: z.string().trim().min(1),
   workspaceId: workspaceIdSchema,
@@ -38,6 +46,10 @@ export const publicWorkspaceSummarySchema = workspaceSummarySchema.omit({
 
 export const workspaceListResponseSchema = z.object({
   workspaces: z.array(workspaceSummarySchema),
+});
+
+export const adminWorkspaceListResponseSchema = z.object({
+  workspaces: z.array(adminWorkspaceSummarySchema),
 });
 
 export const workspaceMemberListResponseSchema = z.object({
@@ -103,6 +115,13 @@ export const publicWorkspaceLookupResponseSchema = z.object({
 
 export const workspaceErrorResponseSchema = z.object({
   error: z.enum([
+    "app_admin_required",
+    "admin_workspace_list_failed",
+    "admin_workspace_member_list_failed",
+    "admin_workspace_member_update_failed",
+    "admin_workspace_module_role_list_failed",
+    "admin_workspace_module_role_update_failed",
+    "admin_workspace_module_role_remove_failed",
     "invalid_session",
     "workspace_list_failed",
     "workspace_create_failed",

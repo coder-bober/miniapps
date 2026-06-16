@@ -1,5 +1,29 @@
 # Changelog
 
+## App-admin workspace UI
+
+- Added an app-admin-only section to the personal workspace access overview.
+- The admin testing tools can load the first 10 global workspaces, inspect members, edit non-owner workspace roles, and manage ModuleLab access.
+- Added `docs/admin-testing.md` with `APP_ADMIN_EMAILS` setup and safety notes.
+
+## App-admin Next proxy routes
+
+- Added `/api/admin/workspaces` Next proxy routes that mirror the Fastify app-admin API.
+- Added shared admin workspace response validation for proxy success payloads.
+- Added Next proxy coverage for session rejection, upstream app-admin denial, member updates, and ModuleLab role changes.
+
+## App-admin Fastify routes
+
+- Added `/v1/admin/workspaces` Fastify routes guarded by the `APP_ADMIN_EMAILS` allowlist.
+- Added app-admin routes for listing workspaces/members, updating existing member roles, and managing ModuleLab access rows.
+- Added route coverage for auth, app-admin denial, validation, service forwarding, and owner-protection errors.
+
+## App-admin workspace service foundation
+
+- Added app-admin Supabase service methods for listing workspaces and workspace members.
+- Added app-admin service methods for changing existing non-owner workspace roles and managing ModuleLab access rows.
+- Added focused service coverage and included it in `test:api:all`.
+
 ## App-admin allowlist foundation
 
 - Added a shared app-admin email allowlist helper for future manual-testing admin routes.

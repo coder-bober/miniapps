@@ -40,6 +40,16 @@ function mapWorkspaceSummaryRecord(item) {
   };
 }
 
+function mapAdminWorkspaceRecord(item) {
+  return {
+    id: item.id,
+    slug: item.slug,
+    name: item.name,
+    kind: item.kind,
+    createdAt: item.created_at,
+  };
+}
+
 function mapPublicWorkspaceRecord(item) {
   return {
     id: item.id,
@@ -76,6 +86,38 @@ function resolveWorkspaceRoleOrder(role) {
   }
 
   return 2;
+}
+
+function normalizeAdminWorkspaceLimit(limit) {
+  if (!Number.isInteger(limit)) {
+    return 10;
+  }
+
+  return Math.min(Math.max(limit, 1), 50);
+}
+
+function assertAdminMembershipRole(role) {
+  if (!["admin", "member"].includes(role)) {
+    const error = new Error("The requested workspace member role is invalid.");
+    error.code = "workspace_member_role_invalid";
+    throw error;
+  }
+}
+
+function assertAdminModuleRole({ moduleId, role }) {
+  if (moduleId !== "module-lab" || !["viewer", "operator"].includes(role)) {
+    const error = new Error("The requested workspace module role is invalid.");
+    error.code = "workspace_module_role_invalid";
+    throw error;
+  }
+}
+
+function assertAdminModuleId(moduleId) {
+  if (moduleId !== "module-lab") {
+    const error = new Error("The requested workspace module is invalid.");
+    error.code = "workspace_module_invalid";
+    throw error;
+  }
 }
 
 
@@ -509,6 +551,129 @@ export function createApiServices(config = getApiConfig(), overrides = {}) {
       }
 
       return await buildWorkspaceMemberSummaryList(workspaceId);
+    },
+    async listAdminWorkspaces({ limit = 10 } = {}) {
+      const normalizedLimit = normalizeAdminWorkspaceLimit(limit);
+      const { data, error } = await adminClient
+        .from("workspaces")
+        .select("id, slug, name, kind, created_at")
+        .order("created_at", { ascending: true })
+        .range(0, normalizedLimit - 1);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map(mapAdminWorkspaceRecord);
+    },
+    async listAdminWorkspaceMembers({ workspaceId }) {
+      return await buildWorkspaceMemberSummaryList(workspaceId);
+    },
+    async updateAdminWorkspaceMemberRole({ workspaceId, targetUserId, role }) {
+      assertAdminMembershipRole(role);
+
+      const targetMembership = await getWorkspaceMembershipRecord({
+        workspaceId,
+        userId: targetUserId,
+      });
+
+      if (!targetMembership) {
+        const error = new Error("The requested workspace member was not found.");
+        error.code = "workspace_member_not_found";
+        throw error;
+      }
+
+      if (targetMembership.role === "owner") {
+        const error = new Error("The workspace owner cannot be modified through this action.");
+        error.code = "workspace_member_owner_protected";
+        throw error;
+      }
+
+      const updateResponse = await adminClient
+        .from("workspace_memberships")
+        .update({ role })
+        .eq("id", targetMembership.id);
+
+      if (updateResponse.error) {
+        throw updateResponse.error;
+      }
+
+      const members = await buildWorkspaceMemberSummaryList(workspaceId);
+      return members.find((member) => member.userId === targetUserId) ?? null;
+    },
+    async listAdminWorkspaceModuleRoles({ workspaceId, moduleId }) {
+      assertAdminModuleId(moduleId);
+
+      const { data, error } = await adminClient
+        .from("workspace_module_roles")
+        .select("workspace_id, user_id, module_id, role")
+        .eq("workspace_id", workspaceId)
+        .eq("module_id", moduleId);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map(mapWorkspaceModuleRoleRecord);
+    },
+    async updateAdminWorkspaceModuleRole({ workspaceId, targetUserId, moduleId, role }) {
+      assertAdminModuleRole({ moduleId, role });
+
+      const targetMembership = await getWorkspaceMembershipRecord({
+        workspaceId,
+        userId: targetUserId,
+      });
+
+      if (!targetMembership) {
+        const error = new Error("The requested workspace member was not found.");
+        error.code = "workspace_module_role_member_not_found";
+        throw error;
+      }
+
+      const { data, error } = await adminClient
+        .from("workspace_module_roles")
+        .upsert(
+          {
+            workspace_id: workspaceId,
+            user_id: targetUserId,
+            module_id: moduleId,
+            role,
+          },
+          { onConflict: "workspace_id,user_id,module_id" },
+        )
+        .select("workspace_id, user_id, module_id, role")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return mapWorkspaceModuleRoleRecord(data);
+    },
+    async deleteAdminWorkspaceModuleRole({ workspaceId, targetUserId, moduleId }) {
+      assertAdminModuleId(moduleId);
+
+      const targetMembership = await getWorkspaceMembershipRecord({
+        workspaceId,
+        userId: targetUserId,
+      });
+
+      if (!targetMembership) {
+        const error = new Error("The requested workspace member was not found.");
+        error.code = "workspace_module_role_member_not_found";
+        throw error;
+      }
+
+      const { error } = await adminClient
+        .from("workspace_module_roles")
+        .delete()
+        .eq("workspace_id", workspaceId)
+        .eq("user_id", targetUserId)
+        .eq("module_id", moduleId);
+
+      if (error) {
+        throw error;
+      }
     },
     async listWorkspaceModuleRoles({ workspaceId, actorUserId, moduleId }) {
       const actorRole = await this.getWorkspaceMembershipRole({
