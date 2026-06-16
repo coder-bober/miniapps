@@ -1,5 +1,10 @@
 # Changelog
 
+## Local production fonts
+
+- Replaced `next/font/google` with local `@fontsource-variable` Manrope and Space Grotesk packages so production builds no longer depend on fetching Google Fonts.
+- Added auth-callback redirect coverage to `test:api:all` so `NEXT_PUBLIC_SITE_URL` origins such as `http://deb4:3001` stay protected from localhost regressions.
+
 ## Workspace storage timeout resilience
 
 - Added bounded S3 request timeouts so workspace file uploads fail quickly instead of hanging on stalled storage calls.

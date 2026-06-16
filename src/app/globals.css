@@ -1,4 +1,6 @@
 :root {
+  --font-manrope: "Manrope Variable";
+  --font-space-grotesk: "Space Grotesk Variable";
   --page-bg: #f4f1ea;
   --text-main: #11212d;
   --surface: rgba(255, 255, 255, 0.72);

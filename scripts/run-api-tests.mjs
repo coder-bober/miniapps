@@ -14,6 +14,7 @@ const apiTestScripts = [
   "test:api:sql-workspace-rbac",
   "test:api:frontend-workspace-rbac",
   "test:api:sign-out-redirect",
+  "test:api:auth-callback-redirect",
   "test:api:sql-user-module-roles-retirement",
   "test:api:storage",
   "test:api:env:dev",

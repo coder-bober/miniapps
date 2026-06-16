@@ -1,23 +1,14 @@
 import type { Metadata } from "next";
 import { ColorSchemeScript } from "@mantine/core";
 import { headers } from "next/headers";
-import { Manrope, Space_Grotesk } from "next/font/google";
 
 import { AppProvider } from "@/components/app-provider";
 import { defaultLocale, isSupportedLocale, siteUrl } from "@/lib/i18n/config";
 
 import "@mantine/core/styles.css";
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/space-grotesk";
 import "./globals.css";
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -37,7 +28,6 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${manrope.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
       <head>

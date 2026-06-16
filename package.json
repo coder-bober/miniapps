@@ -30,6 +30,7 @@
     "test:api:sql-workspace-rbac": "node scripts/run-node-with-warning-filter.mjs api/tests/sql-workspace-rbac-docs.test.mjs",
     "test:api:frontend-workspace-rbac": "node scripts/run-node-with-warning-filter.mjs api/tests/frontend-workspace-rbac-source.test.mjs",
     "test:api:sign-out-redirect": "node scripts/run-node-with-warning-filter.mjs api/tests/sign-out-redirect-url.test.mjs",
+    "test:api:auth-callback-redirect": "node scripts/run-node-with-warning-filter.mjs api/tests/auth-callback-redirect-url.test.mjs",
     "test:api:sql-user-module-roles-retirement": "node scripts/run-node-with-warning-filter.mjs api/tests/sql-user-module-roles-retirement.test.mjs",
     "test:api:storage": "node scripts/run-node-with-warning-filter.mjs api/tests/storage-bucket.test.mjs",
     "test:api:env:dev": "node scripts/run-node-with-warning-filter.mjs api/tests/dev-env-loading.test.mjs",
@@ -58,6 +59,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1007.0",
     "@fastify/multipart": "^9.4.0",
+    "@fontsource-variable/manrope": "^5.2.8",
+    "@fontsource-variable/space-grotesk": "^5.2.10",
     "@mantine/core": "^8.3.16",
     "@mantine/hooks": "^8.3.16",
     "@mantine/next": "^6.0.22",

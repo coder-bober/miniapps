@@ -1,5 +1,11 @@
 # Important changes
 
+## Production builds fetched Google Fonts
+
+Problem: production e2e builds used `next/font/google` for Manrope and Space Grotesk, so an environment without reliable access to `fonts.googleapis.com` could fail before tests started. The `NEXT_PUBLIC_SITE_URL` auth-callback redirect behavior already had focused coverage, but that regression was not part of the standard API suite.
+
+Solution: replaced the Google font loader with local `@fontsource-variable` packages and preserved the existing `--font-manrope` and `--font-space-grotesk` CSS variables. Added the auth-callback redirect regression to `test:api:all` so configured site origins such as `http://deb4:3001` remain covered.
+
 ## Workspace storage timeouts stalled test and upload flows
 
 Problem: workspace file uploads used the default S3 client behavior, so a stalled storage request could hang integration tests or spend multiple SDK retry attempts before surfacing as a generic upload failure. Browser upload tests also treated a transient `workspace_storage_unreachable` response as final, and one redirect test still waited for `networkidle` around an auth redirect.
