@@ -1,5 +1,11 @@
 # Module-Scoped RBAC Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. Module-scoped RBAC was superseded by the completed workspace-scoped RBAC migration; lower sections are retained as implementation history.
+
 ## Goal
 
 Add module-scoped authorization without hardcoding one-off booleans like:

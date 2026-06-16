@@ -1,5 +1,11 @@
 # Enabled Modules Transition Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. The enabled-module foundation has landed; lower sections are retained as implementation history.
+
 ## Goal
 
 Make the current modular-monolith foundation support turning modules on or off with minimal effort, starting with `workspace-files`.

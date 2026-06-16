@@ -1,5 +1,11 @@
 # Workspace Member Management Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. Workspace member listing, role updates, removal, and ownership transfer have landed; lower sections are retained as implementation history.
+
 ## Goal
 
 Add real member-management product behavior on top of the existing workspace core:

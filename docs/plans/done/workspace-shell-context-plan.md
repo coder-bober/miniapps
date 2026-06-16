@@ -1,5 +1,11 @@
 # Workspace Shell Context Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. Workspace selection now lives in the app shell and uses the `bbb` query context; lower sections are retained as implementation history.
+
 ## Goal
 
 Move workspace selection from the `workspace-files` card into the authenticated app shell so workspace becomes a real core app context instead of a module-local control.

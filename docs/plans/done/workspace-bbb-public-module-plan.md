@@ -1,5 +1,11 @@
 # Workspace BBB Public Module Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. The `bbb` workspace-context behavior and public module integration have landed; lower sections are retained as implementation history.
+
 ## Goal
 
 Extend the new workspace shell/public context so it supports:

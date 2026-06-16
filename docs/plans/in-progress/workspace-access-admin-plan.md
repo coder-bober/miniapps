@@ -24,11 +24,17 @@ Completed baseline already in the repo:
 
 Still pending for this feature:
 
+- Tasks 1-8 below have not been implemented yet.
+- No `APP_ADMIN_EMAILS`, `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
 - A personal-workspace overview table for the first 10 workspaces where the signed-in user is `owner`, `admin`, or `member`.
 - A row-level link from that overview into the selected workspace details/management surface.
 - A deliberate manual-testing admin model and seed/setup path.
 - Backend/API permissions for the manual-testing admin to inspect/change roles without being the workspace owner.
 - UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
+
+Next recommended step:
+
+- Start at Task 1 to add the app-admin helper and tests before adding routes or UI.
 
 ## Recommended approach
 

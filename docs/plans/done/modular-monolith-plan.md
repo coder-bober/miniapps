@@ -1,5 +1,11 @@
 # Modular Monolith Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. The modular-monolith foundation has landed; lower sections are retained as implementation history.
+
 ## Goal
 
 Evolve this repository into a modular monolith so new product directions can be added as bounded modules instead of turning the codebase into a tangle of feature-specific conditionals.

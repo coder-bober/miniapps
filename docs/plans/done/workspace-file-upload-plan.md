@@ -1,5 +1,11 @@
 # Workspace File Upload Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. Workspace file upload/list/delete behavior has landed; lower sections are retained as implementation history.
+
 ## Goal
 
 Add a backend-owned, reusable file upload system that starts on the workspace page and is designed to grow into a general file pipeline for the product.

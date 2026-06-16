@@ -1,5 +1,11 @@
 # SEO-Friendly Multilingual Website Plan
 
+## Current status
+
+Status: **done**.
+
+Historical note: This plan is archived under `docs/plans/done`. Some sections below describe the pre-implementation planning state and are kept for context.
+
 ## Scope
 
 This plan applies to the public website surface rendered by Next.js.

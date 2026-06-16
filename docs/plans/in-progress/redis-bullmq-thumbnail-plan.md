@@ -6,18 +6,21 @@ Status: **in progress**.
 
 Completed:
 
+- Phase 1 queue foundation is complete.
 - BullMQ and Redis integration exists in `api/core/queue/bullmq.mjs`.
 - Queue service abstraction exists in `api/core/queue/service.mjs`.
 - Worker entrypoint exists in `api/worker.mjs` and starts BullMQ workers for registered module jobs.
 - Module job registration exists; `workspace-files.generate-thumbnail` is registered by `api/modules/workspace-files/manifest.mjs`.
+- Phase 2 image thumbnail processing is complete for supported image uploads.
 - Upload flow enqueues a thumbnail job after a workspace file is stored.
 - Image thumbnail generation exists in `api/modules/workspace-files/jobs/generate-thumbnail.mjs` using `sharp`.
+- Phase 3 thumbnail state/display plumbing is complete.
 - Thumbnail metadata/status fields are represented in SQL/docs and Supabase service methods.
 - UI/API paths can expose thumbnail state and thumbnail image routes.
 
 Still pending:
 
-- Non-image previews are not implemented yet. Current worker skips non-image files with `status: "skipped"` and a “not supported yet” error.
+- Phase 4 non-image previews are not implemented yet. Current worker skips non-image files with `status: "skipped"` and a “not supported yet” error.
 - PDF, Markdown, and plain-text preview rendering remain future phases.
 - Worker observability/ops can be expanded beyond basic BullMQ log events.
 - Retry/dead-letter/admin handling should be revisited once there are production-like workloads.
