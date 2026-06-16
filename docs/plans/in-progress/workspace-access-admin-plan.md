@@ -25,18 +25,19 @@ Completed baseline already in the repo:
 - Task 5 is complete: the personal workspace page now shows a first-10 workspace access overview with row links that preserve `bbb`.
 - Task 8 is complete: `WORKSPACE_RBAC_STRICT` / `workspaceRbacStrict` runtime support was removed, ModuleLab API requests now always require workspace context, and shared workspaces now expose ModuleLab access management backed by `workspace_module_roles`.
 - Task 9 is complete: authenticated app ModuleLab links preserve `bbb=<currentWorkspaceId>` while public/marketing ModuleLab links remain bare.
+- Task 1 is complete: app-admin email allowlist parsing/checking now has shared helper coverage and runs in `test:api:all`.
 
 Still pending for this feature:
 
-- Tasks 1-4, 6-7, and 10 below have not been implemented yet.
-- No `APP_ADMIN_EMAILS`, `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
+- Tasks 2-4, 6-7, and 10 below have not been implemented yet.
+- No `/api/admin/workspaces`, `/v1/admin/workspaces`, or app-admin UI implementation exists yet.
 - A deliberate manual-testing admin model and seed/setup path.
 - Backend/API permissions for the manual-testing admin to inspect/change workspace memberships and ModuleLab roles without being the workspace owner.
 - UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
 
 Next recommended step:
 
-- Start at Task 1 to add the app-admin allowlist helper and tests, then continue with app-admin service/API/UI tasks.
+- Start at Task 2 to add backend service methods for app-admin workspace inspection, then continue with explicit app-admin API/UI tasks.
 
 ## Recommended approach
 
@@ -193,6 +194,8 @@ Avoid hiding it under normal workspace ownership copy because its powers are bro
 ## Implementation plan
 
 ### Task 1: Add app-admin helper and API contract tests
+
+Status: **done**.
 
 **Objective:** Define the app-admin allowlist behavior without touching UI.
 

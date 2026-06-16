@@ -1,5 +1,11 @@
 # Changelog
 
+## App-admin allowlist foundation
+
+- Added a shared app-admin email allowlist helper for future manual-testing admin routes.
+- Added focused API coverage for trimming, lowercasing, comma-separated allowlists, and empty allowlist denial.
+- Included the app-admin allowlist regression in `test:api:all`.
+
 ## Workspace access overview
 
 - Added a personal-workspace access overview listing the first workspaces the signed-in user belongs to.

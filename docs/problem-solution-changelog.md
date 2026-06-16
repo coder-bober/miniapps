@@ -1,5 +1,11 @@
 # Important changes
 
+## App-admin allowlist foundation
+
+Problem: the workspace access administration plan needs a manual-testing admin account, but no shared contract existed for how `APP_ADMIN_EMAILS` should be parsed or matched. Adding routes before defining that behavior would make route tests duplicate allowlist rules.
+
+Solution: added a shared app-admin email helper that trims and lowercases comma-separated allowlist entries, denies missing or empty allowlists, and has focused API coverage included in `test:api:all`.
+
 ## ModuleLab disconnected from workspace access
 
 Problem: ModuleLab could still be reached from authenticated app navigation without `bbb`, and workspace membership granted default ModuleLab read access. That made ModuleLab behave like one global diagnostics surface instead of a per-workspace module with explicit access rights.
