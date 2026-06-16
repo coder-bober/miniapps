@@ -31,15 +31,15 @@ Completed baseline already in the repo:
 - Task 4 is complete: Next `/api/admin/workspaces...` proxy routes mirror the Fastify app-admin API and preserve upstream app-admin denial/error payloads.
 - Task 6 is complete: the personal workspace overview now shows app-admin-only testing tools for global workspace/member inspection, member role edits, and ModuleLab access edits.
 - Task 7 is complete: `docs/admin-testing.md` documents `APP_ADMIN_EMAILS` setup and safety notes; no `.env.example` exists in this repo.
+- Task 10 is complete: browser coverage now verifies normal workspace overview, app-admin tools, ModuleLab access changes/restriction, and workspace-aware ModuleLab navigation.
 
 Still pending for this feature:
 
-- Task 10 below has not been implemented yet.
-- UI affordances for the manual-testing admin that do not leak into normal users' owner-scoped flow.
+- No tasks remain for the current app-admin workspace access plan.
 
 Next recommended step:
 
-- Start at Task 10 to add focused e2e/source coverage for the app-admin UI behavior.
+- Move this plan to `docs/plans/done` after the final verification/commit pass.
 
 ## Recommended approach
 
@@ -478,6 +478,8 @@ npm run typecheck
 ```
 
 ### Task 10: Add browser regression coverage
+
+Status: **done**.
 
 **Objective:** Prove the normal and app-admin flows work end-to-end.
 

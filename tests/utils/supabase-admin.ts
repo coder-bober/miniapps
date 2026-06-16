@@ -41,6 +41,11 @@ type AuthFixtureState = {
     email: string;
     password: string;
   };
+  appAdminUser: {
+    id: string;
+    email: string;
+    password: string;
+  };
   moduleLabOperatorUser: {
     id: string;
     email: string;
@@ -260,6 +265,10 @@ async function createUser(email: string, password: string, emailConfirmed: boole
   return data.user.id;
 }
 
+function getAppAdminFixtureEmail() {
+  return process.env.APP_ADMIN_EMAILS?.split(",")[0]?.trim().toLowerCase() || "e2e-app-admin@example.com";
+}
+
 async function createPersonalWorkspaceForUser(userId: string, email: string) {
   const supabase = getSupabaseAdminClient();
   const existingWorkspaceResponse = await withRetry(async () =>
@@ -420,6 +429,11 @@ export async function seedAuthFixtureUsers() {
       email: `e2e-workspace-${runId}@example.com`,
       password: `QuietShift!${runId}`,
     },
+    appAdminUser: {
+      id: "",
+      email: getAppAdminFixtureEmail(),
+      password: `QuietShift!${runId}`,
+    },
     moduleLabOperatorUser: {
       id: "",
       email: `e2e-module-lab-operator-${runId}@example.com`,
@@ -452,6 +466,7 @@ export async function seedAuthFixtureUsers() {
   const existingSettingsUser = await getUserByEmail(state.settingsUser.email);
   const existingSessionUser = await getUserByEmail(state.sessionUser.email);
   const existingWorkspaceUser = await getUserByEmail(state.workspaceUser.email);
+  const existingAppAdminUser = await getUserByEmail(state.appAdminUser.email);
   const existingModuleLabOperatorUser = await getUserByEmail(state.moduleLabOperatorUser.email);
   const existingModuleLabViewerUser = await getUserByEmail(state.moduleLabViewerUser.email);
   const existingDeletionValidationUser = await getUserByEmail(state.deletionValidationUser.email);
@@ -476,6 +491,10 @@ export async function seedAuthFixtureUsers() {
 
   if (existingWorkspaceUser) {
     await deleteUserById(existingWorkspaceUser.id);
+  }
+
+  if (existingAppAdminUser) {
+    await deleteUserById(existingAppAdminUser.id);
   }
 
   if (existingModuleLabOperatorUser) {
@@ -529,6 +548,12 @@ export async function seedAuthFixtureUsers() {
   );
   await createPersonalWorkspaceForUser(state.workspaceUser.id, state.workspaceUser.email);
   state.workspaceShared = await createSharedWorkspaceForUser(state.workspaceUser.id, runId);
+  state.appAdminUser.id = await createUser(
+    state.appAdminUser.email,
+    state.appAdminUser.password,
+    true,
+  );
+  await createPersonalWorkspaceForUser(state.appAdminUser.id, state.appAdminUser.email);
   state.moduleLabOperatorUser.id = await createUser(
     state.moduleLabOperatorUser.email,
     state.moduleLabOperatorUser.password,
@@ -574,6 +599,11 @@ export async function seedAuthFixtureUsers() {
   );
   await createPersonalWorkspaceForUser(state.unconfirmedUser.id, state.unconfirmedUser.email);
 
+  await upsertWorkspaceMembership(
+    state.workspaceShared.id,
+    state.confirmedUser.id,
+    "member",
+  );
   await upsertWorkspaceMembership(
     state.moduleLabPublicWorkspace.id,
     state.moduleLabViewerUser.id,
@@ -629,6 +659,7 @@ export async function cleanupAuthFixtureUsers() {
     await deleteUserById(state.settingsUser.id);
     await deleteUserById(state.sessionUser.id);
     await deleteUserById(state.workspaceUser.id);
+    await deleteUserById(state.appAdminUser.id);
     await deleteUserById(state.moduleLabOperatorUser.id);
     await deleteUserById(state.moduleLabViewerUser.id);
     await deleteUserById(state.deletionValidationUser.id);

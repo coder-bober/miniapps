@@ -1,13 +1,13 @@
 import {
   workspaceErrorResponseSchema,
   workspaceModuleRoleListResponseSchema,
-} from "../../../../../../../shared/api/workspaces.mjs";
+} from "../../../../../../shared/api/workspaces.mjs";
 import {
   createAuthorizedUserContext,
   createInvalidSessionResponse,
   forwardJsonResponse,
   jsonResponse,
-} from "../../../../../../../core/api/next-proxy-helpers.mjs";
+} from "../../../../../../core/api/next-proxy-helpers.mjs";
 
 export function createWorkspaceModuleLabRolesRouteHandlers({
   createSupabaseServerClient,

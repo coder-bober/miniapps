@@ -8,6 +8,8 @@ const baseURL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const basePort = new URL(baseURL).port || "3000";
 const serverCommand = process.env.PLAYWRIGHT_SERVER_COMMAND ?? "npm run dev:e2e";
 
+process.env.APP_ADMIN_EMAILS ??= "e2e-app-admin@example.com";
+
 delete process.env.HTTP_PROXY;
 delete process.env.HTTPS_PROXY;
 delete process.env.http_proxy;

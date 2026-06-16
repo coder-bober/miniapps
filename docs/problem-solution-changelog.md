@@ -1,5 +1,11 @@
 # Important changes
 
+## Workspace access admin browser coverage
+
+Problem: the workspace access admin plan had API and UI coverage but no browser-level proof that the normal and app-admin flows work together with seeded users. The e2e server also needed a reproducible app-admin email before tests start.
+
+Solution: added a dedicated workspace access admin Playwright spec, seeded an app-admin fixture, and made Playwright default `APP_ADMIN_EMAILS` to that fixture email when not explicitly configured. The coverage exercises normal overview visibility, app-admin role edits, ModuleLab access changes, restricted ModuleLab access, and `bbb` preservation in ModuleLab app navigation.
+
 ## App-admin workspace UI
 
 Problem: the app-admin API was available but there was no UI for a configured manual-testing admin to inspect or adjust workspace/member/ModuleLab access. The feature also needed setup guidance so enabling app-admin access did not depend on hidden local knowledge.

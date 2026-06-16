@@ -557,7 +557,7 @@ export function createApiServices(config = getApiConfig(), overrides = {}) {
       const { data, error } = await adminClient
         .from("workspaces")
         .select("id, slug, name, kind, created_at")
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: false })
         .range(0, normalizedLimit - 1);
 
       if (error) {

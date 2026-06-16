@@ -78,6 +78,7 @@ const child = spawn(command.file, command.args, {
     ...(enabledModulesOverride !== undefined
       ? { ENABLED_MODULES: enabledModulesOverride }
       : {}),
+    APP_ADMIN_EMAILS: childEnv.APP_ADMIN_EMAILS ?? "e2e-app-admin@example.com",
   }),
 });
 

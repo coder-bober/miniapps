@@ -154,7 +154,7 @@ await runCase("listAdminWorkspaces clamps limit and maps workspace summaries", a
       expectSelect: "id, slug, name, kind, created_at",
       expectOrder: {
         column: "created_at",
-        options: { ascending: true },
+        options: { ascending: false },
       },
       expectRange: {
         from: 0,

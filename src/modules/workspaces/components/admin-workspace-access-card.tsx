@@ -353,6 +353,7 @@ export function AdminWorkspaceAccessCard({
                       <Table.Td>
                         {canEditMemberRole ? (
                           <Select
+                            aria-label={`${dictionary.membersAddRoleLabel}: ${member.email ?? member.displayName}`}
                             data={[
                               { value: "member", label: sharedDictionary.workspaceRoleMember },
                               { value: "admin", label: sharedDictionary.workspaceRoleAdmin },
@@ -373,6 +374,7 @@ export function AdminWorkspaceAccessCard({
                       </Table.Td>
                       <Table.Td>
                         <Select
+                          aria-label={`${dictionary.moduleLabAccessTitle}: ${member.email ?? member.displayName}`}
                           data={[
                             { value: "none", label: dictionary.moduleLabAccessNoAccess },
                             { value: "viewer", label: dictionary.moduleLabAccessViewer },

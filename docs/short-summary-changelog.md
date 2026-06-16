@@ -1,5 +1,11 @@
 # Changelog
 
+## Workspace access admin browser coverage
+
+- Added browser coverage for normal workspace overview behavior and hidden app-admin tools for non-admin users.
+- Added browser coverage for app-admin member role changes, ModuleLab access changes, restricted ModuleLab state, and workspace-aware ModuleLab navigation.
+- Added an e2e app-admin fixture and default Playwright `APP_ADMIN_EMAILS` value for test runs.
+
 ## App-admin workspace UI
 
 - Added an app-admin-only section to the personal workspace access overview.

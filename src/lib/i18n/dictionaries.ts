@@ -495,7 +495,7 @@ const en: SiteDictionary = {
       adminWorkspaceToolsTitle: "Admin testing tools",
       adminWorkspaceToolsDescription:
         "Manual testing admin tools. This section is visible only to configured app-admin accounts.",
-      adminWorkspaceSelectLabel: "Workspace",
+      adminWorkspaceSelectLabel: "Admin workspace",
       adminWorkspaceRefresh: "Refresh",
       adminWorkspaceLoading: "Loading workspace access...",
       adminWorkspaceMembersEmpty: "No members were found for this workspace.",
@@ -889,7 +889,7 @@ const ru: SiteDictionary = {
       adminWorkspaceToolsTitle: "Инструменты администратора",
       adminWorkspaceToolsDescription:
         "Инструменты администратора для ручного тестирования. Раздел виден только настроенным app-admin аккаунтам.",
-      adminWorkspaceSelectLabel: "Рабочее пространство",
+      adminWorkspaceSelectLabel: "Рабочее пространство администратора",
       adminWorkspaceRefresh: "Обновить",
       adminWorkspaceLoading: "Загрузка доступа к рабочему пространству...",
       adminWorkspaceMembersEmpty: "У этого рабочего пространства нет участников.",
