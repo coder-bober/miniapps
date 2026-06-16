@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { DeleteObjectCommand, HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { createClient } from "@supabase/supabase-js";
 
@@ -8,7 +8,11 @@ import { buildApiApp } from "../app.mjs";
 import { assertApiEnv, getApiConfig } from "../config.mjs";
 import { createQueueService } from "../core/queue/service.mjs";
 import { generateWorkspaceFileThumbnail } from "../modules/workspace-files/jobs/generate-thumbnail.mjs";
-import { createStorageService, getStorageConfig } from "../services/storage.mjs";
+import {
+  createStorageClient as createSharedStorageClient,
+  createStorageService,
+  getStorageConfig,
+} from "../services/storage.mjs";
 import { createApiServices } from "../services/supabase.mjs";
 import { assertTestStorageIsolation } from "../../scripts/assert-test-storage-isolation.mjs";
 import { loadEnvFiles } from "../../scripts/load-env.mjs";
@@ -40,15 +44,7 @@ function createAdminClient() {
 }
 
 function createStorageClient() {
-  return new S3Client({
-    endpoint: storageConfig.storageS3Endpoint,
-    region: storageConfig.storageS3Region,
-    forcePathStyle: storageConfig.storageS3ForcePathStyle,
-    credentials: {
-      accessKeyId: storageConfig.storageS3AccessKeyId,
-      secretAccessKey: storageConfig.storageS3SecretAccessKey,
-    },
-  });
+  return createSharedStorageClient(storageConfig);
 }
 
 async function runCase(name, fn) {
@@ -160,6 +156,10 @@ function isTransientAuthResponse(response) {
   }
 
   if (response.statusCode === 500 && response.body.toLowerCase().includes("fetch failed")) {
+    return true;
+  }
+
+  if (response.statusCode === 503 && response.body.includes("workspace_storage_unreachable")) {
     return true;
   }
 

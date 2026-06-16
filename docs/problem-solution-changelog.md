@@ -1,5 +1,11 @@
 # Important changes
 
+## Workspace storage timeouts stalled test and upload flows
+
+Problem: workspace file uploads used the default S3 client behavior, so a stalled storage request could hang integration tests or spend multiple SDK retry attempts before surfacing as a generic upload failure. Browser upload tests also treated a transient `workspace_storage_unreachable` response as final, and one redirect test still waited for `networkidle` around an auth redirect.
+
+Solution: added explicit S3 connection/request timeouts with thrown timeout errors, disabled SDK-level multi-attempt retries, and classified timeout errors as `unreachable` so API responses stay consistent. Workspace upload integration and UI flows now retry the explicit transient storage-unreachable response, and protected-route tests wait for the real redirect URL instead of `networkidle`.
+
 ## Sign-out redirect used request origin instead of configured site URL
 
 Problem: `/auth/sign-out` computed `NextResponse.redirect(new URL(`/${locale}`, request.url))`, so the redirect origin came from the request URL seen by the route. In the reported dev flow the app was opened as `deb5.local`, but the sign-out request/RSC redirect resolved to `localhost:3000`, producing a cross-origin RSC fetch and browser CORS error even though `.env.local` configured `NEXT_PUBLIC_SITE_URL=http://deb5.local:3000`.

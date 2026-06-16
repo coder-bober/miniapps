@@ -79,8 +79,8 @@ test.describe("workspace files", () => {
       buffer: Buffer.from("hello shared workspace e2e"),
     });
 
-    await expect(page.getByText("The file was uploaded.")).toBeVisible();
-    await expect(page.getByText(uniqueName)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("The file was uploaded.")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(uniqueName)).toBeVisible({ timeout: 15000 });
 
     const personalWorkspaceLabel = await getWorkspaceOptionLabel(page, /Personal workspace .*Personal .*Owner/i);
     await chooseWorkspace(page, personalWorkspaceLabel);

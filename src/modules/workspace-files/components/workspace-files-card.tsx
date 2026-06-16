@@ -13,6 +13,22 @@ type WorkspaceFilesCardProps = {
   dictionary: SiteDictionary["app"]["workspace"];
 };
 
+type WorkspaceFileUploadPayload = {
+  error?: string;
+  file?: WorkspaceFile;
+  message?: string;
+};
+
+const maxUploadAttempts = 3;
+
+function isTransientUploadFailure(response: Response, payload: WorkspaceFileUploadPayload | null) {
+  return response.status === 503 && payload?.error === "workspace_storage_unreachable";
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 export function WorkspaceFilesCard({ dictionary }: WorkspaceFilesCardProps) {
   const { currentWorkspace, loading: workspaceLoading, error: workspaceError } = useWorkspaceShellContext();
   const [files, setFiles] = useState<WorkspaceFile[]>([]);
@@ -136,24 +152,33 @@ export function WorkspaceFilesCard({ dictionary }: WorkspaceFilesCardProps) {
 
     startUploadTransition(async () => {
       try {
-        const formData = new FormData();
-        formData.set("workspaceSlug", currentWorkspace?.slug ?? "default");
-        if (currentWorkspace?.id) {
-          formData.set("workspaceId", currentWorkspace.id);
-        }
-        formData.set("file", file);
+        let response: Response | null = null;
+        let payload: WorkspaceFileUploadPayload | null = null;
 
-        const response = await fetch("/api/workspace-files", {
-          method: "POST",
-          body: formData,
-        });
-        const payload = (await response.json().catch(() => null)) as
-          | { file?: WorkspaceFile; message?: string }
-          | null;
+        for (let attempt = 1; attempt <= maxUploadAttempts; attempt += 1) {
+          const formData = new FormData();
+          formData.set("workspaceSlug", currentWorkspace?.slug ?? "default");
+          if (currentWorkspace?.id) {
+            formData.set("workspaceId", currentWorkspace.id);
+          }
+          formData.set("file", file);
+
+          response = await fetch("/api/workspace-files", {
+            method: "POST",
+            body: formData,
+          });
+          payload = (await response.json().catch(() => null)) as WorkspaceFileUploadPayload | null;
+
+          if (!isTransientUploadFailure(response, payload) || attempt === maxUploadAttempts) {
+            break;
+          }
+
+          await wait(500);
+        }
 
         const uploadedFile = payload?.file;
 
-        if (!response.ok || !uploadedFile) {
+        if (!response?.ok || !uploadedFile) {
           setError(payload?.message ?? dictionary.filesUploadFailed);
           return;
         }

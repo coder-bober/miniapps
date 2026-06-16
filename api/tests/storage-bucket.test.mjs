@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { createStorageService } from "../services/storage.mjs";
+import { classifyStorageError, createStorageService } from "../services/storage.mjs";
 
 async function runCase(name, fn) {
   try {
@@ -83,4 +83,14 @@ await runCase("ensureBucketExists does not create the bucket when it already exi
   await service.ensureBucketExists();
 
   assert.deepEqual(sentCommands, ["HeadBucketCommand"]);
+});
+
+await runCase("storage timeout errors are classified as unreachable", async () => {
+  const error = new Error(
+    "@smithy/node-http-handler - [ERROR] a request has exceeded the configured 10000 ms requestTimeout.",
+  );
+  error.name = "TimeoutError";
+  error.code = "ETIMEDOUT";
+
+  assert.equal(classifyStorageError(error), "unreachable");
 });

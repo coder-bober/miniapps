@@ -6,8 +6,12 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 import { getApiConfig } from "../config.mjs";
+
+const storageConnectionTimeoutMs = 3_000;
+const storageRequestTimeoutMs = 10_000;
 
 function normalizeStorageEndpoint(endpoint) {
   return endpoint?.trim().replace(/\/+$/, "") ?? "";
@@ -133,6 +137,12 @@ export function createStorageClient(config = getStorageConfig()) {
     endpoint: resolvedConfig.storageS3Endpoint,
     region: resolvedConfig.storageS3Region,
     forcePathStyle: resolvedConfig.storageS3ForcePathStyle,
+    maxAttempts: 1,
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout: storageConnectionTimeoutMs,
+      requestTimeout: storageRequestTimeoutMs,
+      throwOnRequestTimeout: true,
+    }),
     credentials: {
       accessKeyId: resolvedConfig.storageS3AccessKeyId,
       secretAccessKey: resolvedConfig.storageS3SecretAccessKey,
@@ -153,15 +163,21 @@ function isMissingBucketError(error) {
 
 export function classifyStorageError(error) {
   const errorCode = error?.name ?? error?.Code ?? error?.code ?? "";
+  const transportCode = error?.code ?? "";
   const httpStatusCode = error?.$metadata?.httpStatusCode ?? null;
   const message = error?.message ?? String(error);
 
   if (
+    errorCode === "TimeoutError" ||
     errorCode === "ECONNREFUSED" ||
     errorCode === "ETIMEDOUT" ||
     errorCode === "NetworkingError" ||
+    transportCode === "ECONNREFUSED" ||
+    transportCode === "ETIMEDOUT" ||
     message.includes("ECONNREFUSED") ||
     message.includes("ETIMEDOUT") ||
+    message.toLowerCase().includes("requesttimeout") ||
+    message.toLowerCase().includes("request timeout") ||
     message.toLowerCase().includes("network")
   ) {
     return "unreachable";

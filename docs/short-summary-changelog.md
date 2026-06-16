@@ -1,5 +1,11 @@
 # Changelog
 
+## Workspace storage timeout resilience
+
+- Added bounded S3 request timeouts so workspace file uploads fail quickly instead of hanging on stalled storage calls.
+- Classified storage request timeouts as `workspace_storage_unreachable` and retried transient upload failures in integration tests and the workspace file UI.
+- Removed brittle `networkidle` waits from protected-route redirect e2e tests.
+
 ## Sign-out redirect site URL
 
 - Fixed `/auth/sign-out` to build its post-logout redirect from `NEXT_PUBLIC_SITE_URL` when configured.
