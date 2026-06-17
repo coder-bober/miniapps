@@ -1,4 +1,5 @@
 import { getInternalApiUrl } from "@/lib/api/internal";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { publicWorkspaceLookupResponseSchema } from "@/shared/api/workspaces.mjs";
 
 type SearchParamsInput =
@@ -23,9 +24,11 @@ export type PublicWorkspaceSelection = {
 export async function resolvePublicWorkspaceSelection({
   searchParams,
   fallbackNotice,
+  userId = null,
 }: {
   searchParams: SearchParamsInput;
   fallbackNotice: string;
+  userId?: string | null;
 }): Promise<PublicWorkspaceSelection> {
   const requestedWorkspaceId = readWorkspaceId(searchParams);
 
@@ -35,6 +38,21 @@ export async function resolvePublicWorkspaceSelection({
       workspace: null,
       fallbackNotice: null,
     };
+  }
+
+  if (userId) {
+    const workspace = await resolveAuthenticatedWorkspace({
+      userId,
+      workspaceId: requestedWorkspaceId,
+    });
+
+    if (workspace) {
+      return {
+        requestedWorkspaceId,
+        workspace,
+        fallbackNotice: null,
+      };
+    }
   }
 
   try {
@@ -77,6 +95,42 @@ export async function resolvePublicWorkspaceSelection({
       fallbackNotice,
     };
   }
+}
+
+async function resolveAuthenticatedWorkspace({
+  userId,
+  workspaceId,
+}: {
+  userId: string;
+  workspaceId: string;
+}) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("workspaces")
+    .select("id, slug, name, kind, workspace_memberships!inner(role)")
+    .eq("id", workspaceId)
+    .eq("workspace_memberships.user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  if (
+    typeof data.id !== "string" ||
+    typeof data.slug !== "string" ||
+    typeof data.name !== "string" ||
+    (data.kind !== "personal" && data.kind !== "shared")
+  ) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    slug: data.slug,
+    name: data.name,
+    kind: data.kind,
+  };
 }
 
 function readWorkspaceId(searchParams: SearchParamsInput) {

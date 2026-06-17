@@ -19,6 +19,7 @@ export async function ModuleLabPage({ locale, dictionary, user, searchParams }: 
   const publicWorkspaceSelection = await resolvePublicWorkspaceSelection({
     searchParams,
     fallbackNotice: dictionary.app.moduleLab.publicWorkspaceFallbackNotice,
+    userId: user?.id ?? null,
   });
 
   if (!user) {

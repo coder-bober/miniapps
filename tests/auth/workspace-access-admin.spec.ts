@@ -78,7 +78,13 @@ test.describe("workspace access administration", () => {
     });
 
     const adminWorkspaceSelect = page.getByRole("textbox", { name: "Admin workspace" });
-    await chooseSelectOption(adminWorkspaceSelect, `${fixtures.workspaceShared.name} (shared)`);
+    await chooseSelectOption(
+      adminWorkspaceSelect,
+      `${fixtures.workspaceShared.name} (shared) - ${fixtures.workspaceShared.slug}`,
+    );
+    await expect(
+      page.getByTestId(`admin-workspace-members-${fixtures.workspaceShared.id}`),
+    ).toBeVisible({ timeout: 10000 });
 
     const memberRow = page.getByRole("row").filter({
       hasText: fixtures.confirmedUser.email,
@@ -147,6 +153,19 @@ test.describe("workspace access administration", () => {
     await expect(page.getByText("ModuleLab access was updated.")).toBeVisible({
       timeout: 15000,
     });
+
+    await page.context().clearCookies();
+    await signInWithPassword(page, {
+      locale: "en",
+      email: fixtures.confirmedUser.email,
+      password: fixtures.confirmedUser.password,
+    });
+
+    await page.goto(`/en/module-lab?bbb=${fixtures.workspaceShared.id}`);
+    await expect(page.getByRole("button", { name: /queue module job/i })).toBeEnabled({
+      timeout: 15000,
+    });
+    await expect(page.getByText(/does not have access to the module-lab diagnostics surface/i)).toHaveCount(0);
   });
 
   test("app ModuleLab navigation preserves selected workspace", async ({ page }) => {

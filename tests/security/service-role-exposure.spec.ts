@@ -82,7 +82,10 @@ test.describe("service role key exposure", () => {
     });
 
     await page.goto("/en/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveURL(/\/en\/(settings|sign-in)$/);
+    await expect(page.getByRole("heading", { name: /Settings|Sign in/i })).toBeVisible({
+      timeout: 10000,
+    });
 
     const browserState = await page.evaluate(({ secret, envName }) => {
       const windowRecord = window as unknown as Record<string, unknown> & {

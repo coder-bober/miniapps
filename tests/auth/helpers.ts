@@ -1,4 +1,8 @@
-import { readAuthFixtureState, hasSupabaseAdminEnv } from "../utils/supabase-admin";
+import {
+  ensureAuthFixtureWorkspaceMemberships,
+  readAuthFixtureState,
+  hasSupabaseAdminEnv,
+} from "../utils/supabase-admin";
 import type { Page } from "@playwright/test";
 
 export async function getAuthFixtures() {
@@ -7,7 +11,7 @@ export async function getAuthFixtures() {
   }
 
   try {
-    return await readAuthFixtureState();
+    return await ensureAuthFixtureWorkspaceMemberships(await readAuthFixtureState());
   } catch (error) {
     throw new Error(
       `Auth fixtures are unavailable. Global setup likely failed to seed them: ${String(error)}`,

@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function WorkspacePage({ params }: PageProps) {
   const workspaceFilesEnabled = isModuleEnabled("workspace-files");
+  const moduleLabEnabled = isModuleEnabled("module-lab");
 
   return renderAuthenticatedAppPage({
     params,
@@ -54,12 +55,13 @@ export default async function WorkspacePage({ params }: PageProps) {
           sharedDictionary={dictionary.app.shared}
           locale={locale}
           isAppAdmin={isAppAdminEmail(user.email)}
+          moduleLabEnabled={moduleLabEnabled}
         />
         <WorkspaceMembersCard
           dictionary={dictionary.app.workspace}
           sharedDictionary={dictionary.app.shared}
         />
-        {isModuleEnabled("module-lab") ? (
+        {moduleLabEnabled ? (
           <WorkspaceModuleLabAccessCard dictionary={dictionary.app.workspace} />
         ) : null}
         {workspaceFilesEnabled ? (

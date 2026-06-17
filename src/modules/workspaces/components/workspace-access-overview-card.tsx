@@ -13,6 +13,7 @@ type WorkspaceAccessOverviewCardProps = {
   sharedDictionary: SiteDictionary["app"]["shared"];
   locale: Locale;
   isAppAdmin: boolean;
+  moduleLabEnabled: boolean;
 };
 
 export function WorkspaceAccessOverviewCard({
@@ -20,6 +21,7 @@ export function WorkspaceAccessOverviewCard({
   sharedDictionary,
   locale,
   isAppAdmin,
+  moduleLabEnabled,
 }: WorkspaceAccessOverviewCardProps) {
   const { currentWorkspace, workspaces } = useWorkspaceShellContext();
 
@@ -98,6 +100,7 @@ export function WorkspaceAccessOverviewCard({
           <AdminWorkspaceAccessCard
             dictionary={dictionary}
             sharedDictionary={sharedDictionary}
+            moduleLabEnabled={moduleLabEnabled}
           />
         ) : null}
       </Stack>

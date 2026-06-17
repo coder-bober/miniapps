@@ -43,6 +43,7 @@ type WorkspaceModuleRoleSummary = {
 type AdminWorkspaceAccessCardProps = {
   dictionary: SiteDictionary["app"]["workspace"];
   sharedDictionary: SiteDictionary["app"]["shared"];
+  moduleLabEnabled: boolean;
 };
 
 type ModuleAccessDraft = "none" | "viewer" | "operator";
@@ -50,6 +51,7 @@ type ModuleAccessDraft = "none" | "viewer" | "operator";
 export function AdminWorkspaceAccessCard({
   dictionary,
   sharedDictionary,
+  moduleLabEnabled,
 }: AdminWorkspaceAccessCardProps) {
   const [workspaces, setWorkspaces] = useState<AdminWorkspaceSummary[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
@@ -127,17 +129,21 @@ export function AdminWorkspaceAccessCard({
           method: "GET",
           cache: "no-store",
         }),
-        fetch(`/api/admin/workspaces/${encodeURIComponent(selectedWorkspaceId)}/module-roles/module-lab`, {
-          method: "GET",
-          cache: "no-store",
-        }),
+        moduleLabEnabled
+          ? fetch(`/api/admin/workspaces/${encodeURIComponent(selectedWorkspaceId)}/module-roles/module-lab`, {
+              method: "GET",
+              cache: "no-store",
+            })
+          : Promise.resolve(null),
       ]);
       const membersPayload = (await membersResponse.json().catch(() => null)) as
         | { members?: WorkspaceMemberSummary[]; message?: string }
         | null;
-      const moduleRolesPayload = (await moduleRolesResponse.json().catch(() => null)) as
-        | { moduleRoles?: WorkspaceModuleRoleSummary[]; message?: string }
-        | null;
+      const moduleRolesPayload = moduleRolesResponse
+        ? ((await moduleRolesResponse.json().catch(() => null)) as
+            | { moduleRoles?: WorkspaceModuleRoleSummary[]; message?: string }
+            | null)
+        : null;
 
       if (!membersResponse.ok) {
         setMembers([]);
@@ -145,14 +151,14 @@ export function AdminWorkspaceAccessCard({
         return;
       }
 
-      if (!moduleRolesResponse.ok) {
+      if (moduleRolesResponse && !moduleRolesResponse.ok) {
         setModuleRoles([]);
         setError(moduleRolesPayload?.message ?? dictionary.adminWorkspaceLoadFailed);
         return;
       }
 
       setMembers(membersPayload?.members ?? []);
-      setModuleRoles(moduleRolesPayload?.moduleRoles ?? []);
+      setModuleRoles(moduleLabEnabled ? moduleRolesPayload?.moduleRoles ?? [] : []);
       setRoleDrafts({});
       setModuleRoleDrafts({});
     } catch {
@@ -162,7 +168,7 @@ export function AdminWorkspaceAccessCard({
     } finally {
       setLoadingDetails(false);
     }
-  }, [dictionary.adminWorkspaceLoadFailed, selectedWorkspaceId]);
+  }, [dictionary.adminWorkspaceLoadFailed, moduleLabEnabled, selectedWorkspaceId]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -288,7 +294,7 @@ export function AdminWorkspaceAccessCard({
             label={dictionary.adminWorkspaceSelectLabel}
             data={workspaces.map((workspace) => ({
               value: workspace.id,
-              label: `${workspace.name} (${workspace.kind})`,
+              label: `${workspace.name} (${workspace.kind}) - ${workspace.slug}`,
             }))}
             value={selectedWorkspaceId}
             onChange={setSelectedWorkspaceId}
@@ -321,12 +327,12 @@ export function AdminWorkspaceAccessCard({
 
         {!loadingDetails && members.length > 0 ? (
           <Table.ScrollContainer minWidth={760}>
-            <Table verticalSpacing="sm">
+            <Table verticalSpacing="sm" data-testid={`admin-workspace-members-${selectedWorkspaceId}`}>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>{dictionary.workspaceAccessNameColumn}</Table.Th>
                   <Table.Th>{dictionary.workspaceAccessRoleColumn}</Table.Th>
-                  <Table.Th>{dictionary.moduleLabAccessTitle}</Table.Th>
+                  {moduleLabEnabled ? <Table.Th>{dictionary.moduleLabAccessTitle}</Table.Th> : null}
                   <Table.Th ta="right">{dictionary.workspaceAccessActionColumn}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -372,26 +378,28 @@ export function AdminWorkspaceAccessCard({
                           sharedDictionary.workspaceRoleOwner
                         )}
                       </Table.Td>
-                      <Table.Td>
-                        <Select
-                          aria-label={`${dictionary.moduleLabAccessTitle}: ${member.email ?? member.displayName}`}
-                          data={[
-                            { value: "none", label: dictionary.moduleLabAccessNoAccess },
-                            { value: "viewer", label: dictionary.moduleLabAccessViewer },
-                            { value: "operator", label: dictionary.moduleLabAccessOperator },
-                          ]}
-                          value={moduleDraft}
-                          onChange={(value) => {
-                            setModuleRoleDrafts((current) => ({
-                              ...current,
-                              [member.userId]:
-                                value === "operator" ? "operator" : value === "viewer" ? "viewer" : "none",
-                            }));
-                          }}
-                          allowDeselect={false}
-                          w={170}
-                        />
-                      </Table.Td>
+                      {moduleLabEnabled ? (
+                        <Table.Td>
+                          <Select
+                            aria-label={`${dictionary.moduleLabAccessTitle}: ${member.email ?? member.displayName}`}
+                            data={[
+                              { value: "none", label: dictionary.moduleLabAccessNoAccess },
+                              { value: "viewer", label: dictionary.moduleLabAccessViewer },
+                              { value: "operator", label: dictionary.moduleLabAccessOperator },
+                            ]}
+                            value={moduleDraft}
+                            onChange={(value) => {
+                              setModuleRoleDrafts((current) => ({
+                                ...current,
+                                [member.userId]:
+                                  value === "operator" ? "operator" : value === "viewer" ? "viewer" : "none",
+                              }));
+                            }}
+                            allowDeselect={false}
+                            w={170}
+                          />
+                        </Table.Td>
+                      ) : null}
                       <Table.Td>
                         <Group justify="flex-end" gap="xs">
                           {canEditMemberRole ? (
@@ -407,18 +415,20 @@ export function AdminWorkspaceAccessCard({
                               {dictionary.membersRoleSave}
                             </Button>
                           ) : null}
-                          <Button
-                            variant="light"
-                            color="teal"
-                            size="xs"
-                            disabled={!moduleChanged}
-                            loading={updatingModuleUserId === member.userId}
-                            onClick={() => {
-                              void handleSaveModuleRole(member);
-                            }}
-                          >
-                            {dictionary.moduleLabAccessSave}
-                          </Button>
+                          {moduleLabEnabled ? (
+                            <Button
+                              variant="light"
+                              color="teal"
+                              size="xs"
+                              disabled={!moduleChanged}
+                              loading={updatingModuleUserId === member.userId}
+                              onClick={() => {
+                                void handleSaveModuleRole(member);
+                              }}
+                            >
+                              {dictionary.moduleLabAccessSave}
+                            </Button>
+                          ) : null}
                         </Group>
                       </Table.Td>
                     </Table.Tr>

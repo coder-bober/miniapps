@@ -212,24 +212,74 @@ async function upsertWorkspaceModuleRole(
   }
 }
 
-async function upsertWorkspaceMembership(workspaceId: string, userId: string, role: string) {
+async function resetWorkspaceMemberships(
+  workspaceId: string,
+  memberships: Array<{ userId: string; role: string }>,
+) {
   const supabase = getSupabaseAdminClient();
-  const response = await withRetry<{
+  const deleteResponse = await withRetry<{
     error: { code?: string; message?: string } | null;
   }>(async () =>
-    await supabase.from("workspace_memberships").upsert(
-      {
+    await supabase.from("workspace_memberships").delete().eq("workspace_id", workspaceId),
+  );
+
+  if (deleteResponse.error) {
+    throw deleteResponse.error;
+  }
+
+  const insertResponse = await withRetry<{
+    error: { code?: string; message?: string } | null;
+  }>(async () =>
+    await supabase.from("workspace_memberships").insert(
+      memberships.map((membership) => ({
         workspace_id: workspaceId,
-        user_id: userId,
-        role,
-      },
-      { onConflict: "workspace_id,user_id" },
+        user_id: membership.userId,
+        role: membership.role,
+      })),
     ),
   );
 
-  if (response.error) {
-    throw response.error;
+  if (insertResponse.error) {
+    throw insertResponse.error;
   }
+}
+
+export async function ensureAuthFixtureWorkspaceMemberships(state?: AuthFixtureState) {
+  if (!hasSupabaseAdminEnv()) {
+    return state ?? await readAuthFixtureState();
+  }
+
+  const resolvedState = state ?? await readAuthFixtureState();
+  const workspaceUser = await getUserByEmail(resolvedState.workspaceUser.email);
+  const confirmedUser = await getUserByEmail(resolvedState.confirmedUser.email);
+  const moduleLabOperatorUser = resolvedState.moduleLabPublicWorkspace.id
+    ? await getUserByEmail(resolvedState.moduleLabOperatorUser.email)
+    : null;
+  const moduleLabViewerUser = resolvedState.moduleLabPublicWorkspace.id
+    ? await getUserByEmail(resolvedState.moduleLabViewerUser.email)
+    : null;
+
+  if (!workspaceUser?.id || !confirmedUser?.id) {
+    throw new Error("Auth fixture users are missing from Supabase.");
+  }
+
+  await resetWorkspaceMemberships(resolvedState.workspaceShared.id, [
+    { userId: workspaceUser.id, role: "owner" },
+    { userId: confirmedUser.id, role: "member" },
+  ]);
+
+  if (resolvedState.moduleLabPublicWorkspace.id) {
+    if (!moduleLabOperatorUser?.id || !moduleLabViewerUser?.id) {
+      throw new Error("ModuleLab fixture users are missing from Supabase.");
+    }
+
+    await resetWorkspaceMemberships(resolvedState.moduleLabPublicWorkspace.id, [
+      { userId: moduleLabOperatorUser.id, role: "owner" },
+      { userId: moduleLabViewerUser.id, role: "member" },
+    ]);
+  }
+
+  return resolvedState;
 }
 
 async function createUser(email: string, password: string, emailConfirmed: boolean) {
@@ -599,16 +649,7 @@ export async function seedAuthFixtureUsers() {
   );
   await createPersonalWorkspaceForUser(state.unconfirmedUser.id, state.unconfirmedUser.email);
 
-  await upsertWorkspaceMembership(
-    state.workspaceShared.id,
-    state.confirmedUser.id,
-    "member",
-  );
-  await upsertWorkspaceMembership(
-    state.moduleLabPublicWorkspace.id,
-    state.moduleLabViewerUser.id,
-    "member",
-  );
+  await ensureAuthFixtureWorkspaceMemberships(state);
   await upsertWorkspaceModuleRole(
     moduleLabOperatorPersonalWorkspaceId,
     state.moduleLabOperatorUser.id,
