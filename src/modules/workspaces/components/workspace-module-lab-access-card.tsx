@@ -164,6 +164,7 @@ export function WorkspaceModuleLabAccessCard({ dictionary }: WorkspaceModuleLabA
 
   return (
     <Card
+      data-testid={`workspace-module-lab-access-${currentWorkspace.id}`}
       radius={24}
       p={{ base: "lg", md: "xl" }}
       style={{
@@ -193,7 +194,13 @@ export function WorkspaceModuleLabAccessCard({ dictionary }: WorkspaceModuleLabA
               const draft = roleDrafts[member.userId] ?? toAccessDraft(currentRole);
 
               return (
-                <Card key={member.membershipId} radius={18} p="md" style={{ border: "1px solid var(--line)" }}>
+                <Card
+                  key={member.membershipId}
+                  data-testid={`workspace-module-lab-access-member-${member.userId}`}
+                  radius={18}
+                  p="md"
+                  style={{ border: "1px solid var(--line)" }}
+                >
                   <Group justify="space-between" align="end" gap="md">
                     <div>
                       <Text fw={600}>{member.displayName}</Text>
@@ -209,6 +216,7 @@ export function WorkspaceModuleLabAccessCard({ dictionary }: WorkspaceModuleLabA
                     {canManage ? (
                       <Group align="end" gap="sm">
                         <Select
+                          data-testid={`workspace-module-lab-access-select-${member.userId}`}
                           label={dictionary.moduleLabAccessTitle}
                           data={[
                             { value: "none", label: dictionary.moduleLabAccessNoAccess },
@@ -226,6 +234,7 @@ export function WorkspaceModuleLabAccessCard({ dictionary }: WorkspaceModuleLabA
                           w={{ base: "100%", sm: 180 }}
                         />
                         <Button
+                          data-testid={`workspace-module-lab-access-save-${member.userId}`}
                           variant="light"
                           loading={savingUserId === member.userId}
                           disabled={draft === toAccessDraft(currentRole)}

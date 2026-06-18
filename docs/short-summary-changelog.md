@@ -1,5 +1,10 @@
 # Changelog
 
+## Stable E2E selectors
+
+- Added stable workspace/member/module access test ids for complex repeated workspace access UI.
+- Updated workspace access admin browser coverage to avoid Mantine class selectors and broad row text filters.
+
 ## API route test organization
 
 - Split the broad API route test bucket into account, workspace, workspace-file, and queue-service suites.

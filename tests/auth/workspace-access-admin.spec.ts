@@ -28,9 +28,7 @@ test.describe("workspace access administration", () => {
     });
     await expect(page.getByRole("heading", { name: "Admin testing tools" })).toHaveCount(0);
 
-    const sharedWorkspaceRow = page.getByRole("row").filter({
-      hasText: fixtures.workspaceShared.name,
-    });
+    const sharedWorkspaceRow = page.getByTestId(`workspace-access-row-${fixtures.workspaceShared.id}`);
     await expect(sharedWorkspaceRow.getByText("Owner")).toBeVisible();
     await expect(sharedWorkspaceRow.getByRole("link", { name: "Open" })).toHaveAttribute(
       "href",
@@ -63,17 +61,20 @@ test.describe("workspace access administration", () => {
         page.getByTestId(`admin-workspace-members-${adminWorkspace.id}`),
       ).toBeVisible({ timeout: 10000 });
 
-      const memberRow = page.getByRole("row").filter({
-        hasText: fixtures.confirmedUser.email,
-      });
+      const memberRow = page.getByTestId(`admin-workspace-member-row-${fixtures.confirmedUser.id}`);
       await expect(memberRow).toBeVisible({ timeout: 10000 });
 
-      await chooseSelectOption(memberRow.getByRole("textbox").first(), "Admin");
-      await memberRow.getByRole("button", { name: "Save role" }).click();
+      await chooseSelectOption(
+        page.getByTestId(`admin-workspace-member-role-select-${fixtures.confirmedUser.id}`),
+        "Admin",
+      );
+      await page.getByTestId(`admin-workspace-member-role-save-${fixtures.confirmedUser.id}`).click();
       await expect(page.getByText("Workspace access was updated.")).toBeVisible({
         timeout: 15000,
       });
-      await expect(memberRow.getByRole("textbox").first()).toHaveValue("Admin");
+      await expect(
+        page.getByTestId(`admin-workspace-member-role-select-${fixtures.confirmedUser.id}`),
+      ).toHaveValue("Admin");
     } finally {
       await deleteWorkspaceFixtureById(adminWorkspace.id);
     }
@@ -114,22 +115,25 @@ test.describe("workspace access administration", () => {
       timeout: 10000,
     });
 
-    const moduleLabAccessCard = page.locator(".mantine-Card-root").filter({
-      has: page.getByRole("heading", { name: "ModuleLab access" }),
-    }).first();
-    const memberCard = moduleLabAccessCard.locator(".mantine-Card-root").filter({
-      hasText: fixtures.confirmedUser.email,
-    });
+    const moduleLabAccessCard = page.getByTestId(`workspace-module-lab-access-${fixtures.workspaceShared.id}`);
+    const memberCard = page.getByTestId(`workspace-module-lab-access-member-${fixtures.confirmedUser.id}`);
+    await expect(moduleLabAccessCard).toBeVisible({ timeout: 10000 });
     await expect(memberCard).toBeVisible({ timeout: 10000 });
 
-    await chooseSelectOption(memberCard.getByRole("textbox").first(), "Viewer");
-    await memberCard.getByRole("button", { name: "Save access" }).click();
+    await chooseSelectOption(
+      page.getByTestId(`workspace-module-lab-access-select-${fixtures.confirmedUser.id}`),
+      "Viewer",
+    );
+    await page.getByTestId(`workspace-module-lab-access-save-${fixtures.confirmedUser.id}`).click();
     await expect(page.getByText("ModuleLab access was updated.")).toBeVisible({
       timeout: 15000,
     });
 
-    await chooseSelectOption(memberCard.getByRole("textbox").first(), "Operator");
-    await memberCard.getByRole("button", { name: "Save access" }).click();
+    await chooseSelectOption(
+      page.getByTestId(`workspace-module-lab-access-select-${fixtures.confirmedUser.id}`),
+      "Operator",
+    );
+    await page.getByTestId(`workspace-module-lab-access-save-${fixtures.confirmedUser.id}`).click();
     await expect(page.getByText("ModuleLab access was updated.")).toBeVisible({
       timeout: 15000,
     });

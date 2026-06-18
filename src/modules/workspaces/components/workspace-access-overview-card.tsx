@@ -55,7 +55,7 @@ export function WorkspaceAccessOverviewCard({
           <Text c="dimmed">{dictionary.workspaceAccessEmpty}</Text>
         ) : (
           <Table.ScrollContainer minWidth={620}>
-            <Table verticalSpacing="sm">
+            <Table verticalSpacing="sm" data-testid="workspace-access-table">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>{dictionary.workspaceAccessNameColumn}</Table.Th>
@@ -66,7 +66,14 @@ export function WorkspaceAccessOverviewCard({
               </Table.Thead>
               <Table.Tbody>
                 {visibleWorkspaces.map((workspace) => (
-                  <Table.Tr key={workspace.id ?? workspace.slug}>
+                  <Table.Tr
+                    key={workspace.id ?? workspace.slug}
+                    data-testid={
+                      workspace.id
+                        ? `workspace-access-row-${workspace.id}`
+                        : `workspace-access-row-${workspace.slug}`
+                    }
+                  >
                     <Table.Td>
                       <Text fw={600}>{workspace.name}</Text>
                     </Table.Td>

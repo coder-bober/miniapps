@@ -362,7 +362,10 @@ export function AdminWorkspaceAccessCard({
                     (moduleDraft === "none" ? null : moduleDraft) !== currentModuleRole;
 
                   return (
-                    <Table.Tr key={member.membershipId}>
+                    <Table.Tr
+                      key={member.membershipId}
+                      data-testid={`admin-workspace-member-row-${member.userId}`}
+                    >
                       <Table.Td>
                         <Text fw={600}>{member.displayName}</Text>
                         {member.email ? (
@@ -374,6 +377,7 @@ export function AdminWorkspaceAccessCard({
                       <Table.Td>
                         {canEditMemberRole ? (
                           <Select
+                            data-testid={`admin-workspace-member-role-select-${member.userId}`}
                             aria-label={`${dictionary.membersAddRoleLabel}: ${member.email ?? member.displayName}`}
                             data={[
                               { value: "member", label: sharedDictionary.workspaceRoleMember },
@@ -419,6 +423,7 @@ export function AdminWorkspaceAccessCard({
                         <Group justify="flex-end" gap="xs">
                           {canEditMemberRole ? (
                             <Button
+                              data-testid={`admin-workspace-member-role-save-${member.userId}`}
                               variant="light"
                               size="xs"
                               disabled={!roleChanged}
@@ -432,6 +437,7 @@ export function AdminWorkspaceAccessCard({
                           ) : null}
                           {moduleLabEnabled ? (
                             <Button
+                              data-testid={`admin-workspace-module-lab-save-${member.userId}`}
                               variant="light"
                               color="teal"
                               size="xs"

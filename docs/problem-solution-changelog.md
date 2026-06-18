@@ -1,5 +1,11 @@
 # Important changes
 
+## Stable workspace access selectors
+
+Problem: workspace access browser coverage still relied on repeated row text filters and Mantine card class selectors for member and ModuleLab access controls. Those selectors were vulnerable to layout/component changes and repeated text collisions.
+
+Solution: added stable `data-testid` hooks to workspace access rows, admin member rows/actions, and workspace ModuleLab access member cards/actions. The workspace access admin spec now targets workspace/user ids instead of styling classes or broad text filters.
+
 ## API route test split
 
 Problem: one large API route test file mixed health, account, workspace, workspace-file, and queue-service coverage. The broad `test:api:routes` bucket made failures harder to triage and hid the actual domain affected by a test failure.
