@@ -1,5 +1,11 @@
 # Important changes
 
+## Test suite manifest
+
+Problem: test suite commands, module flags, production/dev mode, and aggregate ordering were spread across `package.json` and several runner scripts. Adding or changing a suite required coordinated edits in multiple places, which made drift likely.
+
+Solution: added a shared test suite manifest plus a generic suite runner. Existing npm script names now delegate to manifest suite ids, while aggregate runners reuse the shared runner instead of carrying duplicate spawn and timing logic.
+
 ## Playwright color environment warning suppression
 
 Problem: Playwright test sessions could print noisy Node warnings when both `NO_COLOR` and `FORCE_COLOR` were present. Setting `FORCE_COLOR=0` alone was not enough because Node still treats the variable as set and warns that `NO_COLOR` is ignored.

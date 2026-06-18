@@ -1,5 +1,11 @@
 # Changelog
 
+## Test suite manifest
+
+- Added a shared test suite manifest as the source of truth for test commands, module flags, and aggregate suite ordering.
+- Existing npm test script names now delegate to manifest suite ids.
+- Aggregate test runners now share one runner implementation for command execution and duration summaries.
+
 ## Playwright warning cleanup
 
 - Playwright runner sessions now avoid the noisy Node warning emitted when `NO_COLOR` and `FORCE_COLOR` are both present.
