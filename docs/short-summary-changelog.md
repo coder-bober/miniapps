@@ -1,5 +1,10 @@
 # Changelog
 
+## Shared E2E helpers
+
+- Added shared browser-test helpers for module enablement checks and workspace/select controls.
+- Updated workspace access, workspace files, and ModuleLab specs to use the shared helpers.
+
 ## E2E wait reliability
 
 - Removed the remaining `networkidle` waits from E2E specs.

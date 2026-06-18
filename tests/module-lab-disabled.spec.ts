@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 import { attachBrowserErrorCapture } from "./utils/browser-errors";
+import { isModuleExplicitlyDisabledForSuite } from "./utils/modules";
 
 test.skip(
-  process.env.ENABLED_MODULES === undefined || process.env.ENABLED_MODULES.includes("module-lab"),
+  !isModuleExplicitlyDisabledForSuite("module-lab"),
   "module-lab disabled smoke test runs only in a suite that explicitly disables module-lab.",
 );
 

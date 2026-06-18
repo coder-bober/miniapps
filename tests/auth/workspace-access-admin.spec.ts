@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { getAuthFixtures, signInWithPassword } from "./helpers";
 import {
@@ -6,37 +6,8 @@ import {
   deleteWorkspaceFixtureById,
   hasSupabaseAdminEnv,
 } from "../utils/supabase-admin";
-
-function isModuleEnabledForSuite(moduleId: string) {
-  const enabledModules = process.env.ENABLED_MODULES;
-
-  if (enabledModules === undefined) {
-    return true;
-  }
-
-  if (!enabledModules.trim()) {
-    return false;
-  }
-
-  return enabledModules
-    .split(",")
-    .map((enabledModuleId) => enabledModuleId.trim())
-    .filter(Boolean)
-    .includes(moduleId);
-}
-
-async function chooseSelectOption(locator: Locator, optionName: string | RegExp) {
-  await expect(locator).toBeVisible({ timeout: 10000 });
-  await locator.click();
-  await locator.page().getByRole("option", { name: optionName }).click();
-}
-
-async function chooseWorkspace(page: Page, label: string) {
-  await chooseSelectOption(page.getByRole("textbox", { name: "Workspace" }), label);
-  await expect(page.getByRole("textbox", { name: "Workspace" })).toHaveValue(label, {
-    timeout: 10000,
-  });
-}
+import { chooseSelectOption, chooseWorkspace } from "../utils/controls";
+import { isModuleEnabledForSuite } from "../utils/modules";
 
 test.describe("workspace access administration", () => {
   test.skip(!hasSupabaseAdminEnv(), "Supabase admin test env is not configured.");

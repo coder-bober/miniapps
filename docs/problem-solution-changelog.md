@@ -1,5 +1,11 @@
 # Important changes
 
+## Shared E2E helper extraction
+
+Problem: E2E specs duplicated module-flag parsing and workspace/select control helpers, with slightly different defaults for enabled modules. That made it easier for suites to drift when module combinations changed.
+
+Solution: added shared E2E utilities for `ENABLED_MODULES` parsing and common select/workspace interactions, then updated workspace access, workspace files, and ModuleLab specs to use them. Focused auth and ModuleLab browser suites verify the refactor.
+
 ## E2E networkidle wait removal
 
 Problem: several browser specs still used `page.waitForLoadState("networkidle")`, which can hang or add timing sensitivity when the app has background requests or long-lived browser activity. This conflicted with the project's established E2E guidance to wait for real redirect or UI outcomes.

@@ -1,27 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { signInWithPassword, getAuthFixtures } from "./auth/helpers";
 import { attachBrowserErrorCapture } from "./utils/browser-errors";
-
-function isModuleLabEnabledForSuite() {
-  const enabledModules = process.env.ENABLED_MODULES;
-
-  if (enabledModules === undefined) {
-    return false;
-  }
-
-  if (!enabledModules.trim()) {
-    return false;
-  }
-
-  return enabledModules
-    .split(",")
-    .map((moduleId) => moduleId.trim())
-    .filter(Boolean)
-    .includes("module-lab");
-}
+import { isModuleEnabledForSuite } from "./utils/modules";
 
 test.skip(
-  !isModuleLabEnabledForSuite(),
+  !isModuleEnabledForSuite("module-lab", { defaultWhenUnset: false }),
   "module-lab public smoke tests run only when the module-lab module is enabled for the suite.",
 );
 

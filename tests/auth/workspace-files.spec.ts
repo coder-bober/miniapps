@@ -2,55 +2,11 @@ import { expect, test } from "@playwright/test";
 import sharp from "sharp";
 
 import { getAuthFixtures, signInWithPassword } from "./helpers";
-
-function isWorkspaceFilesEnabledForSuite() {
-  const enabledModules = process.env.ENABLED_MODULES;
-
-  if (enabledModules === undefined) {
-    return true;
-  }
-
-  if (!enabledModules.trim()) {
-    return false;
-  }
-
-  return enabledModules
-    .split(",")
-    .map((moduleId) => moduleId.trim())
-    .filter(Boolean)
-    .includes("workspace-files");
-}
-
-async function chooseWorkspace(page: import("@playwright/test").Page, label: string) {
-  const workspaceSelect = page.getByRole("textbox", { name: "Workspace" });
-  await expect(workspaceSelect).toBeVisible({ timeout: 10000 });
-  await workspaceSelect.click();
-  await page.getByRole("option", { name: label, exact: true }).click();
-  await expect(workspaceSelect).toHaveValue(label, { timeout: 10000 });
-}
-
-async function getWorkspaceOptionLabel(
-  page: import("@playwright/test").Page,
-  matcher: RegExp,
-) {
-  const workspaceSelect = page.getByRole("textbox", { name: "Workspace" });
-  await expect(workspaceSelect).toBeVisible({ timeout: 10000 });
-  await workspaceSelect.click();
-
-  const option = page.getByRole("option").filter({ hasText: matcher }).first();
-  const label = (await option.textContent())?.trim() ?? "";
-
-  await workspaceSelect.press("Escape");
-
-  if (!label) {
-    throw new Error(`Workspace option matching ${matcher} was not found.`);
-  }
-
-  return label;
-}
+import { chooseWorkspace, getWorkspaceOptionLabel } from "../utils/controls";
+import { isModuleEnabledForSuite } from "../utils/modules";
 
 test.skip(
-  !isWorkspaceFilesEnabledForSuite(),
+  !isModuleEnabledForSuite("workspace-files"),
   "workspace-files browser tests run only when the workspace-files module is enabled for the suite.",
 );
 
