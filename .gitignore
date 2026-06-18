@@ -43,5 +43,5 @@ next-env.d.ts
 screenshots/
 test-results/
 .playwright/
+scripts/admin-utils/reset_data/last-run.json
 FarMenu.ini
-
