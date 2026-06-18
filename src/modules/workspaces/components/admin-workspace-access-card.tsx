@@ -151,16 +151,16 @@ export function AdminWorkspaceAccessCard({
         return;
       }
 
-      if (moduleRolesResponse && !moduleRolesResponse.ok) {
-        setModuleRoles([]);
-        setError(moduleRolesPayload?.message ?? dictionary.adminWorkspaceLoadFailed);
-        return;
-      }
-
       setMembers(membersPayload?.members ?? []);
-      setModuleRoles(moduleLabEnabled ? moduleRolesPayload?.moduleRoles ?? [] : []);
+      setModuleRoles(
+        moduleLabEnabled && moduleRolesResponse?.ok ? moduleRolesPayload?.moduleRoles ?? [] : [],
+      );
       setRoleDrafts({});
       setModuleRoleDrafts({});
+
+      if (moduleRolesResponse && !moduleRolesResponse.ok) {
+        setError(moduleRolesPayload?.message ?? dictionary.moduleLabAccessLoadFailed);
+      }
     } catch {
       setMembers([]);
       setModuleRoles([]);

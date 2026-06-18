@@ -76,19 +76,21 @@ export function WorkspaceModuleLabAccessCard({ dictionary }: WorkspaceModuleLabA
         | { moduleRoles?: WorkspaceModuleRoleSummary[]; message?: string }
         | null;
 
-      if (!membersResponse.ok || !rolesResponse.ok) {
+      if (!membersResponse.ok) {
         setMembers([]);
         setModuleRoles([]);
         setError(
-          membersPayload?.message ??
-            rolesPayload?.message ??
-            dictionary.moduleLabAccessLoadFailed,
+          membersPayload?.message ?? dictionary.moduleLabAccessLoadFailed,
         );
         return;
       }
 
       setMembers(membersPayload?.members ?? []);
-      setModuleRoles(rolesPayload?.moduleRoles ?? []);
+      setModuleRoles(rolesResponse.ok ? rolesPayload?.moduleRoles ?? [] : []);
+
+      if (!rolesResponse.ok) {
+        setError(rolesPayload?.message ?? dictionary.moduleLabAccessLoadFailed);
+      }
     } catch {
       setMembers([]);
       setModuleRoles([]);
