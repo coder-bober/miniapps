@@ -2,40 +2,7 @@ import assert from "node:assert/strict";
 
 import { createWorkspaceFileItemRouteHandlers } from "../../src/app/api/workspace-files/[id]/route-handlers.mjs";
 import { createWorkspaceFileThumbnailRouteHandlers } from "../../src/app/api/workspace-files/[id]/thumbnail/route-handlers.mjs";
-import { readJson, runCase } from "./helpers/test-helpers.mjs";
-
-function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123" } = {}) {
-  return async function createSupabaseServerClient() {
-    return {
-      auth: {
-        async getSession() {
-          return {
-            data: {
-              session: accessToken
-                ? {
-                    access_token: accessToken,
-                  }
-                : null,
-            },
-          };
-        },
-        async getUser(token) {
-          assert.equal(token, accessToken);
-
-          return {
-            data: {
-              user: accessToken
-                ? {
-                    id: userId,
-                  }
-                : null,
-            },
-          };
-        },
-      },
-    };
-  };
-}
+import { createNextProxyDependencies, readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createItemHandlers({
   moduleEnabled = true,
@@ -53,8 +20,9 @@ function createItemHandlers({
       assert.equal(moduleId, "workspace-files");
       return moduleEnabled;
     },
-    createSupabaseServerClient: createSupabaseServerClientStub({
+    ...createNextProxyDependencies({
       accessToken,
+      fetchImplementation,
     }),
     async getCurrentUserWorkspaceModuleAccess(userId, workspaceId, moduleId) {
       assert.equal(userId, "user-123");
@@ -70,10 +38,6 @@ function createItemHandlers({
         workspaceSlug,
       };
     },
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
-    fetchImplementation,
   });
 }
 
@@ -99,8 +63,9 @@ function createThumbnailHandlers({
       assert.equal(moduleId, "workspace-files");
       return moduleEnabled;
     },
-    createSupabaseServerClient: createSupabaseServerClientStub({
+    ...createNextProxyDependencies({
       accessToken,
+      fetchImplementation,
     }),
     async getCurrentUserWorkspaceModuleAccess(userId, workspaceId, moduleId) {
       assert.equal(userId, "user-123");
@@ -116,10 +81,6 @@ function createThumbnailHandlers({
         workspaceSlug,
       };
     },
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
-    fetchImplementation,
   });
 }
 

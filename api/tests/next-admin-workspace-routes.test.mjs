@@ -5,54 +5,16 @@ import { createAdminWorkspaceMembersRouteHandlers } from "../../src/app/api/admi
 import { createAdminWorkspaceMemberItemRouteHandlers } from "../../src/app/api/admin/workspaces/[workspaceId]/members/[userId]/route-handlers.mjs";
 import { createAdminWorkspaceModuleLabRolesRouteHandlers } from "../../src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/route-handlers.mjs";
 import { createAdminWorkspaceModuleLabRoleItemRouteHandlers } from "../../src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/[userId]/route-handlers.mjs";
-import { readJson, runCase } from "./helpers/test-helpers.mjs";
-
-function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123" } = {}) {
-  return async function createSupabaseServerClient() {
-    return {
-      auth: {
-        async getSession() {
-          return {
-            data: {
-              session: accessToken
-                ? {
-                    access_token: accessToken,
-                  }
-                : null,
-            },
-          };
-        },
-        async getUser(token) {
-          assert.equal(token, accessToken);
-
-          return {
-            data: {
-              user: accessToken
-                ? {
-                    id: userId,
-                  }
-                : null,
-            },
-          };
-        },
-      },
-    };
-  };
-}
+import { createNextProxyDependencies, readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createDependencies({
   accessToken = "token-123",
   fetchImplementation = async () => Response.json({ workspaces: [] }),
 } = {}) {
-  return {
-    createSupabaseServerClient: createSupabaseServerClientStub({
-      accessToken,
-    }),
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
+  return createNextProxyDependencies({
+    accessToken,
     fetchImplementation,
-  };
+  });
 }
 
 await runCase("admin workspaces Next proxy returns 401 when the session is missing", async () => {

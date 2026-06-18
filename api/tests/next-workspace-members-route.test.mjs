@@ -1,54 +1,18 @@
 import assert from "node:assert/strict";
 
 import { createWorkspaceMembersRouteHandlers } from "../../src/app/api/workspaces/[workspaceId]/members/route-handlers.mjs";
-import { readJson, runCase } from "./helpers/test-helpers.mjs";
-
-function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123" } = {}) {
-  return async function createSupabaseServerClient() {
-    return {
-      auth: {
-        async getSession() {
-          return {
-            data: {
-              session: accessToken
-                ? {
-                    access_token: accessToken,
-                  }
-                : null,
-            },
-          };
-        },
-        async getUser(token) {
-          assert.equal(token, accessToken);
-
-          return {
-            data: {
-              user: accessToken
-                ? {
-                    id: userId,
-                  }
-                : null,
-            },
-          };
-        },
-      },
-    };
-  };
-}
+import { createNextProxyDependencies, readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createHandlers({
   accessToken = "token-123",
   fetchImplementation = async () => Response.json({ members: [] }),
 } = {}) {
-  return createWorkspaceMembersRouteHandlers({
-    createSupabaseServerClient: createSupabaseServerClientStub({
+  return createWorkspaceMembersRouteHandlers(
+    createNextProxyDependencies({
       accessToken,
+      fetchImplementation,
     }),
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
-    fetchImplementation,
-  });
+  );
 }
 
 await runCase("workspace members Next proxy returns 401 when the session is missing", async () => {

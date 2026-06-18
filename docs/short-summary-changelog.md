@@ -1,5 +1,10 @@
 # Changelog
 
+## Shared Next proxy test setup
+
+- Added shared Next proxy test dependency helpers for Supabase session and internal API stubs.
+- Updated Next proxy specs to reuse the shared setup while keeping module access behavior local.
+
 ## Shared API test helpers
 
 - Added shared API helpers for case execution and response JSON reading.

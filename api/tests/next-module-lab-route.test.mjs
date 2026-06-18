@@ -1,42 +1,7 @@
 import assert from "node:assert/strict";
 
 import { createModuleLabRouteHandlers } from "../../src/app/api/module-lab/route-handlers.mjs";
-import { readJson, runCase } from "./helpers/test-helpers.mjs";
-
-function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123", user = null } = {}) {
-  return async function createSupabaseServerClient() {
-    return {
-      auth: {
-        async getSession() {
-          return {
-            data: {
-              session: accessToken
-                ? {
-                    access_token: accessToken,
-                  }
-                : null,
-            },
-          };
-        },
-        async getUser(token) {
-          assert.equal(token, accessToken);
-
-          return {
-            data: {
-              user:
-                user ??
-                (accessToken
-                  ? {
-                      id: userId,
-                    }
-                  : null),
-            },
-          };
-        },
-      },
-    };
-  };
-}
+import { createNextProxyDependencies, readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createHandlers({
   moduleEnabled = true,
@@ -59,10 +24,11 @@ function createHandlers({
       assert.equal(moduleId, "module-lab");
       return moduleEnabled;
     },
-    createSupabaseServerClient: createSupabaseServerClientStub({
+    ...createNextProxyDependencies({
       accessToken,
       userId,
       user,
+      fetchImplementation,
     }),
     async getCurrentUserModuleAccess(resolvedUserId, moduleId) {
       assert.equal(resolvedUserId, userId);
@@ -77,10 +43,6 @@ function createHandlers({
         ...workspaceModuleAccess,
       };
     },
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
-    fetchImplementation,
   });
 }
 

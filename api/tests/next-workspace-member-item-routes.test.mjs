@@ -2,65 +2,30 @@ import assert from "node:assert/strict";
 
 import { createWorkspaceMemberItemRouteHandlers } from "../../src/app/api/workspaces/[workspaceId]/members/[userId]/route-handlers.mjs";
 import { createWorkspaceTransferOwnerRouteHandlers } from "../../src/app/api/workspaces/[workspaceId]/members/transfer-owner/route-handlers.mjs";
-import { readJson, runCase } from "./helpers/test-helpers.mjs";
-
-function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123" } = {}) {
-  return async function createSupabaseServerClient() {
-    return {
-      auth: {
-        async getSession() {
-          return {
-            data: {
-              session: accessToken
-                ? {
-                    access_token: accessToken,
-                  }
-                : null,
-            },
-          };
-        },
-        async getUser(token) {
-          assert.equal(token, accessToken);
-
-          return {
-            data: {
-              user: accessToken
-                ? {
-                    id: userId,
-                  }
-                : null,
-            },
-          };
-        },
-      },
-    };
-  };
-}
+import { createNextProxyDependencies, readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createMemberItemHandlers({
   accessToken = "token-123",
   fetchImplementation = async () => Response.json({ ok: true }),
 } = {}) {
-  return createWorkspaceMemberItemRouteHandlers({
-    createSupabaseServerClient: createSupabaseServerClientStub({ accessToken }),
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
-    fetchImplementation,
-  });
+  return createWorkspaceMemberItemRouteHandlers(
+    createNextProxyDependencies({
+      accessToken,
+      fetchImplementation,
+    }),
+  );
 }
 
 function createTransferHandlers({
   accessToken = "token-123",
   fetchImplementation = async () => Response.json({ ok: true }),
 } = {}) {
-  return createWorkspaceTransferOwnerRouteHandlers({
-    createSupabaseServerClient: createSupabaseServerClientStub({ accessToken }),
-    getInternalApiUrl() {
-      return "http://internal-api.test";
-    },
-    fetchImplementation,
-  });
+  return createWorkspaceTransferOwnerRouteHandlers(
+    createNextProxyDependencies({
+      accessToken,
+      fetchImplementation,
+    }),
+  );
 }
 
 await runCase("workspace member item Next proxy forwards role updates to the internal API", async () => {

@@ -1,5 +1,11 @@
 # Important changes
 
+## Shared Next proxy test dependencies
+
+Problem: Next proxy API tests duplicated the same Supabase session stub, internal API URL, and fetch dependency setup in every proxy spec. That made auth-forwarding test setup noisy and increased the chance of inconsistent proxy harness behavior.
+
+Solution: added shared Next proxy test dependency helpers and updated the proxy specs to reuse them while keeping module-specific access stubs local to the tests that need them.
+
 ## Shared API test helpers
 
 Problem: API tests duplicated small case-runner and JSON response helpers across route, proxy, service, SQL, and integration coverage. Updating simple harness behavior consistently required touching many unrelated test files.
