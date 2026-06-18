@@ -1,5 +1,11 @@
 # Important changes
 
+## Playwright color environment warning suppression
+
+Problem: Playwright test sessions could print noisy Node warnings when both `NO_COLOR` and `FORCE_COLOR` were present. Setting `FORCE_COLOR=0` alone was not enough because Node still treats the variable as set and warns that `NO_COLOR` is ignored.
+
+Solution: the Playwright runner now defaults `FORCE_COLOR=0`, the warning-filter environment helper removes `NO_COLOR` whenever `FORCE_COLOR` is present, and the Node warning filter suppresses the exact color-env warning as a fallback.
+
 ## Workspace access admin browser coverage
 
 Problem: the workspace access admin plan had API and UI coverage but no browser-level proof that the normal and app-admin flows work together with seeded users. The e2e server also needed a reproducible app-admin email before tests start.

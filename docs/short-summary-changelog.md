@@ -1,5 +1,10 @@
 # Changelog
 
+## Playwright warning cleanup
+
+- Playwright runner sessions now avoid the noisy Node warning emitted when `NO_COLOR` and `FORCE_COLOR` are both present.
+- The warning filter keeps an exact fallback suppression for that color-env warning in generated test logs.
+
 ## Workspace access admin browser coverage
 
 - Added browser coverage for normal workspace overview behavior and hidden app-admin tools for non-admin users.

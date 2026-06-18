@@ -79,6 +79,7 @@ const child = spawn(command.file, command.args, {
       ? { ENABLED_MODULES: enabledModulesOverride }
       : {}),
     APP_ADMIN_EMAILS: childEnv.APP_ADMIN_EMAILS ?? "e2e-app-admin@example.com",
+    FORCE_COLOR: childEnv.FORCE_COLOR ?? "0",
   }),
 });
 
