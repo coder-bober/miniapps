@@ -1,5 +1,11 @@
 # Important changes
 
+## API route test split
+
+Problem: one large API route test file mixed health, account, workspace, workspace-file, and queue-service coverage. The broad `test:api:routes` bucket made failures harder to triage and hid the actual domain affected by a test failure.
+
+Solution: split the route bucket into domain-focused test files with shared route-test helpers. The stable `test:api:routes` script now runs the account, workspace, workspace-file, and queue-service suites through the test manifest.
+
 ## Shared E2E helper extraction
 
 Problem: E2E specs duplicated module-flag parsing and workspace/select control helpers, with slightly different defaults for enabled modules. That made it easier for suites to drift when module combinations changed.

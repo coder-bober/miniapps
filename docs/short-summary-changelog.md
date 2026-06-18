@@ -1,5 +1,10 @@
 # Changelog
 
+## API route test organization
+
+- Split the broad API route test bucket into account, workspace, workspace-file, and queue-service suites.
+- Kept `test:api:routes` as the stable aggregate script through the test suite manifest.
+
 ## Shared E2E helpers
 
 - Added shared browser-test helpers for module enablement checks and workspace/select controls.

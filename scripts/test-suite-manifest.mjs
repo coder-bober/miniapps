@@ -54,7 +54,28 @@ export const testSuites = {
   },
   "api:routes": {
     label: "test:api:routes",
-    ...nodeScript("scripts/run-node-with-warning-filter.mjs", "api/tests/account-delete.test.mjs"),
+    children: [
+      "api:routes:account",
+      "api:routes:workspaces",
+      "api:routes:workspace-files",
+      "api:queue-service",
+    ],
+  },
+  "api:routes:account": {
+    label: "test:api:routes:account",
+    ...nodeScript("scripts/run-node-with-warning-filter.mjs", "api/tests/account-routes.test.mjs"),
+  },
+  "api:routes:workspaces": {
+    label: "test:api:routes:workspaces",
+    ...nodeScript("scripts/run-node-with-warning-filter.mjs", "api/tests/workspace-routes.test.mjs"),
+  },
+  "api:routes:workspace-files": {
+    label: "test:api:routes:workspace-files",
+    ...nodeScript("scripts/run-node-with-warning-filter.mjs", "api/tests/workspace-file-routes.test.mjs"),
+  },
+  "api:queue-service": {
+    label: "test:api:queue-service",
+    ...nodeScript("scripts/run-node-with-warning-filter.mjs", "api/tests/queue-service.test.mjs"),
   },
   "api:modules": {
     label: "test:api:modules",
