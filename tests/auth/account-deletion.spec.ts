@@ -23,11 +23,10 @@ test.describe("account deletion", () => {
     await expect(page).toHaveURL(/\/en\/workspace$/);
 
     await page.goto("/en/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByLabel("Confirm with your account email")).toBeVisible();
 
     await page.getByLabel("Confirm with your account email").fill("wrong@example.com");
     await page.getByRole("button", { name: /^delete account$/i }).click();
-    await page.waitForLoadState("networkidle");
 
     await expect(page).toHaveURL(/\/en\/settings\?/);
     await expect(page.getByText(/enter your account email exactly/i)).toBeVisible();
@@ -56,7 +55,7 @@ test.describe("account deletion", () => {
     await expect(page).toHaveURL(/\/en\/workspace$/);
 
     await page.goto("/en/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByLabel("Confirm with your account email")).toBeVisible();
 
     await page
       .getByLabel("Confirm with your account email")
@@ -78,14 +77,13 @@ test.describe("account deletion", () => {
     expect(profile).toBeNull();
 
     await page.goto("/en/workspace");
-    await page.waitForLoadState("networkidle");
     await expect(page).toHaveURL(/\/en\/sign-in$/);
 
     await page.goto("/en/sign-in");
+    await expect(page.getByLabel("Email")).toBeVisible();
     await page.getByLabel("Email").fill(fixtures.deletionUser.email);
     await page.getByLabel("Password").fill(fixtures.deletionUser.password);
     await page.getByRole("button", { name: /^sign in$/i }).click();
-    await page.waitForLoadState("networkidle");
 
     await expect(page).toHaveURL(/\/en\/sign-in\?/);
     await expect(page.getByText(/invalid login credentials/i)).toBeVisible();

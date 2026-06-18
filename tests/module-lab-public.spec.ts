@@ -38,7 +38,6 @@ test("module-lab public page loads without browser errors when the module is ena
   const { pageErrors, consoleErrors, failedRequests } = attachBrowserErrorCapture(page);
 
   const response = await page.goto("/en/module-lab");
-  await page.waitForLoadState("networkidle");
 
   expect(response?.ok()).toBeTruthy();
   await expect(page).toHaveTitle(/Module Lab/i);
@@ -55,7 +54,6 @@ test("module-lab public page resolves a public bbb workspace and shows a fallbac
   const { pageErrors, consoleErrors, failedRequests } = attachBrowserErrorCapture(page);
 
   const publicResponse = await page.goto(`/en/module-lab?bbb=${fixtures.moduleLabPublicWorkspace.id}`);
-  await page.waitForLoadState("networkidle");
 
   expect(publicResponse?.ok()).toBeTruthy();
   await expect(
@@ -63,7 +61,6 @@ test("module-lab public page resolves a public bbb workspace and shows a fallbac
   ).toBeVisible();
 
   const fallbackResponse = await page.goto("/en/module-lab?bbb=missing-workspace-id");
-  await page.waitForLoadState("networkidle");
 
   expect(fallbackResponse?.ok()).toBeTruthy();
   await expect(page.getByText(/requested public workspace is unavailable/i)).toBeVisible();
@@ -85,7 +82,6 @@ test("module-lab signed-in page queues a module job without browser errors when 
   });
 
   await page.goto(`/en/module-lab?bbb=${fixtures.moduleLabPublicWorkspace.id}`);
-  await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveTitle(/Module Lab/i);
   await expect(page.getByRole("heading", { level: 1, name: /module lab/i })).toBeVisible();
@@ -93,7 +89,6 @@ test("module-lab signed-in page queues a module job without browser errors when 
 
   await page.getByLabel(/job message/i).fill("Module lab browser test");
   await page.getByRole("button", { name: /queue module job/i }).click();
-  await page.waitForLoadState("networkidle");
 
   await expect(page.getByRole("alert").getByText(/the module-lab job was queued/i)).toBeVisible();
 
@@ -114,7 +109,6 @@ test("module-lab signed-in viewer sees diagnostics without queue controls", asyn
   });
 
   await page.goto(`/en/module-lab?bbb=${fixtures.moduleLabPublicWorkspace.id}`);
-  await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveTitle(/Module Lab/i);
   await expect(page.getByRole("heading", { level: 3, name: /module health probe/i })).toBeVisible();
@@ -139,7 +133,6 @@ test("module-lab signed-in user without a module role sees the restricted state"
   });
 
   await page.goto("/en/module-lab");
-  await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveTitle(/Module Lab/i);
   await expect(page.getByText(/does not have access to the module-lab diagnostics surface/i)).toBeVisible();

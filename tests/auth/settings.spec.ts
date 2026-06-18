@@ -19,7 +19,7 @@ test.describe("account settings", () => {
     await expect(page).toHaveURL(/\/en\/workspace$/);
 
     await page.goto("/en/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("textbox", { name: /^new password$/i })).toBeVisible();
 
     await page.getByRole("textbox", { name: /^new password$/i }).fill(newPassword);
     await page.getByRole("textbox", { name: /^confirm new password$/i }).fill(newPassword);

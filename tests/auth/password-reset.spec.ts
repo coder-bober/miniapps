@@ -18,12 +18,11 @@ test.describe("password reset", () => {
     const recoveryLink = await generatePasswordRecoveryLink(fixtures.resetUser.email, "en");
 
     await page.goto(recoveryLink);
-    await page.waitForLoadState("networkidle");
 
     await expect(page).toHaveURL(/\/en\/reset-password/);
+    await expect(page.getByLabel("New password")).toBeVisible();
     await page.getByLabel("New password").fill(newPassword);
     await page.getByRole("button", { name: /update password/i }).click();
-    await page.waitForLoadState("networkidle");
 
     await expect
       .poll(() => page.url())

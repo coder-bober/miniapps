@@ -5,7 +5,6 @@ test("homepage loads without page errors", async ({ page }) => {
   const { pageErrors, consoleErrors, failedRequests } = attachBrowserErrorCapture(page);
 
   const response = await page.goto("/en");
-  await page.waitForLoadState("networkidle");
 
   expect(response?.ok()).toBeTruthy();
   await expect(page).toHaveTitle(/QuietShift/i);
@@ -22,13 +21,11 @@ test("auth recovery pages load without page errors", async ({ page }) => {
   await page.goto("/en/sign-in");
   await expect(page.getByRole("link", { name: /forgot password/i })).toBeVisible();
   await page.getByRole("link", { name: /forgot password/i }).click();
-  await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveURL(/\/en\/forgot-password$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/reset your password/i);
 
   await page.goto("/en/reset-password");
-  await page.waitForLoadState("networkidle");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/choose a new password/i);
 
   expect(pageErrors, `Page errors:\n${pageErrors.join("\n")}`).toEqual([]);

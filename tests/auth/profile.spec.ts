@@ -17,13 +17,12 @@ test.describe("profile", () => {
     await expect(page).toHaveURL(/\/en\/workspace$/);
 
     await page.goto("/en/profile");
-    await page.waitForLoadState("networkidle");
     await expect(page).toHaveURL(/\/en\/profile/);
+    await expect(page.getByLabel("Full name")).toBeVisible();
 
     await page.getByLabel("Full name").fill("E2E Updated User");
     await page.getByLabel("Username").fill(uniqueUsername);
     await page.getByRole("button", { name: /save profile/i }).click();
-    await page.waitForLoadState("networkidle");
 
     await expect(page).toHaveURL(/\/en\/profile\?message=/);
     await expect(page.getByRole("alert").filter({ hasText: /profile changes saved/i })).toBeVisible();

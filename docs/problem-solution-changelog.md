@@ -1,5 +1,11 @@
 # Important changes
 
+## E2E networkidle wait removal
+
+Problem: several browser specs still used `page.waitForLoadState("networkidle")`, which can hang or add timing sensitivity when the app has background requests or long-lived browser activity. This conflicted with the project's established E2E guidance to wait for real redirect or UI outcomes.
+
+Solution: replaced the remaining `networkidle` waits in E2E specs with targeted assertions for loaded form controls, headings, alerts, URLs, and module page state. Focused auth, ModuleLab, disabled-module, and homepage-error runs now cover the edited specs.
+
 ## Test suite manifest
 
 Problem: test suite commands, module flags, production/dev mode, and aggregate ordering were spread across `package.json` and several runner scripts. Adding or changing a suite required coordinated edits in multiple places, which made drift likely.

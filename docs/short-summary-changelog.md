@@ -1,5 +1,10 @@
 # Changelog
 
+## E2E wait reliability
+
+- Removed the remaining `networkidle` waits from E2E specs.
+- Browser tests now wait for concrete URL, form, heading, alert, or module-state outcomes instead of global network quietness.
+
 ## Test suite manifest
 
 - Added a shared test suite manifest as the source of truth for test commands, module flags, and aggregate suite ordering.

@@ -11,7 +11,6 @@ test("homepage loads without browser errors when module-lab is disabled", async 
   const { pageErrors, consoleErrors, failedRequests } = attachBrowserErrorCapture(page);
 
   const response = await page.goto("/en");
-  await page.waitForLoadState("networkidle");
 
   expect(response?.ok()).toBeTruthy();
   await expect(page).toHaveTitle(/QuietShift/i);
