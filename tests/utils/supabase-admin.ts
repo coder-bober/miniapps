@@ -426,6 +426,32 @@ async function createSharedWorkspaceForUser(ownerUserId: string, runId: string, 
   return workspaceResponse.data;
 }
 
+export async function createWorkspaceAccessAdminFixtureWorkspace(state: AuthFixtureState) {
+  const ownerUser = await getUserByEmail(state.workspaceUser.email);
+  const memberUser = await getUserByEmail(state.confirmedUser.email);
+
+  if (!ownerUser?.id || !memberUser?.id) {
+    throw new Error("Workspace access admin fixture users are missing from Supabase.");
+  }
+
+  const runId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const workspace = await createSharedWorkspaceForUser(ownerUser.id, runId, {
+    slugPrefix: "admin-access",
+    namePrefix: "Admin Access Workspace",
+  });
+
+  await resetWorkspaceMemberships(workspace.id, [
+    { userId: ownerUser.id, role: "owner" },
+    { userId: memberUser.id, role: "member" },
+  ]);
+
+  return workspace;
+}
+
+export async function deleteWorkspaceFixtureById(id: string) {
+  await deleteWorkspaceById(id);
+}
+
 async function deleteWorkspaceById(id: string) {
   const supabase = getSupabaseAdminClient();
   const { error } = await withRetry(async () => await supabase.from("workspaces").delete().eq("id", id));

@@ -1,7 +1,11 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { getAuthFixtures, signInWithPassword } from "./helpers";
-import { hasSupabaseAdminEnv } from "../utils/supabase-admin";
+import {
+  createWorkspaceAccessAdminFixtureWorkspace,
+  deleteWorkspaceFixtureById,
+  hasSupabaseAdminEnv,
+} from "../utils/supabase-admin";
 
 function isModuleEnabledForSuite(moduleId: string) {
   const enabledModules = process.env.ENABLED_MODULES;
@@ -65,38 +69,43 @@ test.describe("workspace access administration", () => {
 
   test("app-admin can change an existing workspace member role", async ({ page }) => {
     const fixtures = await getAuthFixtures();
+    const adminWorkspace = await createWorkspaceAccessAdminFixtureWorkspace(fixtures);
 
-    await signInWithPassword(page, {
-      locale: "en",
-      email: fixtures.appAdminUser.email,
-      password: fixtures.appAdminUser.password,
-    });
+    try {
+      await signInWithPassword(page, {
+        locale: "en",
+        email: fixtures.appAdminUser.email,
+        password: fixtures.appAdminUser.password,
+      });
 
-    await expect(page).toHaveURL(/\/en\/workspace$/);
-    await expect(page.getByRole("heading", { name: "Admin testing tools" })).toBeVisible({
-      timeout: 10000,
-    });
+      await expect(page).toHaveURL(/\/en\/workspace$/);
+      await expect(page.getByRole("heading", { name: "Admin testing tools" })).toBeVisible({
+        timeout: 10000,
+      });
 
-    const adminWorkspaceSelect = page.getByRole("textbox", { name: "Admin workspace" });
-    await chooseSelectOption(
-      adminWorkspaceSelect,
-      `${fixtures.workspaceShared.name} (shared) - ${fixtures.workspaceShared.slug}`,
-    );
-    await expect(
-      page.getByTestId(`admin-workspace-members-${fixtures.workspaceShared.id}`),
-    ).toBeVisible({ timeout: 10000 });
+      const adminWorkspaceSelect = page.getByRole("textbox", { name: "Admin workspace" });
+      await chooseSelectOption(
+        adminWorkspaceSelect,
+        `${adminWorkspace.name} (shared) - ${adminWorkspace.slug}`,
+      );
+      await expect(
+        page.getByTestId(`admin-workspace-members-${adminWorkspace.id}`),
+      ).toBeVisible({ timeout: 10000 });
 
-    const memberRow = page.getByRole("row").filter({
-      hasText: fixtures.confirmedUser.email,
-    });
-    await expect(memberRow).toBeVisible({ timeout: 10000 });
+      const memberRow = page.getByRole("row").filter({
+        hasText: fixtures.confirmedUser.email,
+      });
+      await expect(memberRow).toBeVisible({ timeout: 10000 });
 
-    await chooseSelectOption(memberRow.getByRole("textbox").first(), "Admin");
-    await memberRow.getByRole("button", { name: "Save role" }).click();
-    await expect(page.getByText("Workspace access was updated.")).toBeVisible({
-      timeout: 15000,
-    });
-    await expect(memberRow.getByRole("textbox").first()).toHaveValue("Admin");
+      await chooseSelectOption(memberRow.getByRole("textbox").first(), "Admin");
+      await memberRow.getByRole("button", { name: "Save role" }).click();
+      await expect(page.getByText("Workspace access was updated.")).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(memberRow.getByRole("textbox").first()).toHaveValue("Admin");
+    } finally {
+      await deleteWorkspaceFixtureById(adminWorkspace.id);
+    }
   });
 
   test("member without ModuleLab role sees restricted workspace ModuleLab state", async ({ page }) => {
