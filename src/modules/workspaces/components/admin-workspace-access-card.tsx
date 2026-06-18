@@ -117,7 +117,7 @@ export function AdminWorkspaceAccessCard({
     if (!selectedWorkspaceId) {
       setMembers([]);
       setModuleRoles([]);
-      return;
+      return [];
     }
 
     setLoadingDetails(true);
@@ -148,10 +148,11 @@ export function AdminWorkspaceAccessCard({
       if (!membersResponse.ok) {
         setMembers([]);
         setError(membersPayload?.message ?? dictionary.adminWorkspaceLoadFailed);
-        return;
+        return [];
       }
 
-      setMembers(membersPayload?.members ?? []);
+      const nextMembers = membersPayload?.members ?? [];
+      setMembers(nextMembers);
       setModuleRoles(
         moduleLabEnabled && moduleRolesResponse?.ok ? moduleRolesPayload?.moduleRoles ?? [] : [],
       );
@@ -161,10 +162,13 @@ export function AdminWorkspaceAccessCard({
       if (moduleRolesResponse && !moduleRolesResponse.ok) {
         setError(moduleRolesPayload?.message ?? dictionary.moduleLabAccessLoadFailed);
       }
+
+      return nextMembers;
     } catch {
       setMembers([]);
       setModuleRoles([]);
       setError(dictionary.adminWorkspaceLoadFailed);
+      return [];
     } finally {
       setLoadingDetails(false);
     }
@@ -211,6 +215,17 @@ export function AdminWorkspaceAccessCard({
       const payload = (await response.json().catch(() => null)) as { message?: string } | null;
 
       if (!response.ok) {
+        const refreshedMembers = await loadWorkspaceDetails();
+        const refreshedMember = refreshedMembers.find(
+          (workspaceMember) => workspaceMember.userId === member.userId,
+        );
+
+        if (refreshedMember?.role === nextRole) {
+          setError(null);
+          setFeedback(dictionary.adminWorkspaceUpdateSuccess);
+          return;
+        }
+
         setError(payload?.message ?? dictionary.adminWorkspaceUpdateFailed);
         return;
       }
