@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 import { createWorkspacesRouteHandlers } from "../../src/app/api/workspaces/route-handlers.mjs";
+import { readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123" } = {}) {
   return async function createSupabaseServerClient() {
@@ -51,20 +52,6 @@ function createHandlers({
     },
     fetchImplementation,
   });
-}
-
-async function readJson(response) {
-  return await response.json();
-}
-
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
 }
 
 await runCase("workspaces Next proxy returns 401 when the session is missing", async () => {

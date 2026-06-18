@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { buildApiApp } from "../app.mjs";
 import { createQueueService } from "../core/queue/service.mjs";
@@ -64,15 +65,6 @@ async function withAppAdminEmails(value, fn) {
   }
 }
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("admin workspace routes reject requests without authorization", async () => {
   await withAppAdminEmails("admin@example.com", async () => {

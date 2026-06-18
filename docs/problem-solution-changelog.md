@@ -1,5 +1,11 @@
 # Important changes
 
+## Shared API test helpers
+
+Problem: API tests duplicated small case-runner and JSON response helpers across route, proxy, service, SQL, and integration coverage. Updating simple harness behavior consistently required touching many unrelated test files.
+
+Solution: added shared API test helpers for case execution and JSON response reading, then updated API tests to import those helpers instead of carrying local copies.
+
 ## Stable workspace access selectors
 
 Problem: workspace access browser coverage still relied on repeated row text filters and Mantine card class selectors for member and ModuleLab access controls. Those selectors were vulnerable to layout/component changes and repeated text collisions.

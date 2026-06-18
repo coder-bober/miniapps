@@ -1,16 +1,8 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { isAppAdminEmail, parseAppAdminEmails } from "../../src/shared/admin/app-admin.mjs";
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("direct allowlist match grants app-admin access", async () => {
   assert.equal(isAppAdminEmail("admin@example.com", "admin@example.com"), true);

@@ -1,16 +1,8 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { createAuthCallbackRedirectUrl } from "../../src/shared/auth/callback-redirect.mjs";
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("auth callback redirect uses configured public site URL instead of request URL origin", async () => {
   const redirectUrl = createAuthCallbackRedirectUrl({

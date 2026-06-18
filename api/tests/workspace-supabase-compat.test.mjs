@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { createApiServices } from "../services/supabase.mjs";
 
@@ -100,15 +101,6 @@ function createQuerySequenceClient(steps) {
   };
 }
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("strict ownership transfer uses transactional RPC", async () => {
   let rpcCall = null;

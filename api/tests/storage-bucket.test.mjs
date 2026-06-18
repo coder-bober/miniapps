@@ -1,16 +1,8 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { classifyStorageError, createStorageService } from "../services/storage.mjs";
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("ensureBucketExists creates the bucket when it is missing", async () => {
   const sentCommands = [];

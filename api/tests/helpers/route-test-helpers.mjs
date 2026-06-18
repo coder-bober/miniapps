@@ -1,3 +1,5 @@
+export { runCase } from "./test-helpers.mjs";
+
 export function createServices(overrides = {}) {
   return {
     async verifyAccessToken() {
@@ -80,14 +82,4 @@ export function createServices(overrides = {}) {
     },
     ...overrides,
   };
-}
-
-export async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
 }

@@ -5,6 +5,7 @@ import { createAdminWorkspaceMembersRouteHandlers } from "../../src/app/api/admi
 import { createAdminWorkspaceMemberItemRouteHandlers } from "../../src/app/api/admin/workspaces/[workspaceId]/members/[userId]/route-handlers.mjs";
 import { createAdminWorkspaceModuleLabRolesRouteHandlers } from "../../src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/route-handlers.mjs";
 import { createAdminWorkspaceModuleLabRoleItemRouteHandlers } from "../../src/app/api/admin/workspaces/[workspaceId]/module-roles/module-lab/[userId]/route-handlers.mjs";
+import { readJson, runCase } from "./helpers/test-helpers.mjs";
 
 function createSupabaseServerClientStub({ accessToken = "token-123", userId = "user-123" } = {}) {
   return async function createSupabaseServerClient() {
@@ -52,20 +53,6 @@ function createDependencies({
     },
     fetchImplementation,
   };
-}
-
-async function readJson(response) {
-  return await response.json();
-}
-
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
 }
 
 await runCase("admin workspaces Next proxy returns 401 when the session is missing", async () => {

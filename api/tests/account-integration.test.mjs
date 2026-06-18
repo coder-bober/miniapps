@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { createClient } from "@supabase/supabase-js";
 
@@ -29,15 +30,6 @@ function createAdminClient() {
   });
 }
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 async function createDisposableConfirmedUser() {
   const admin = createAdminClient();

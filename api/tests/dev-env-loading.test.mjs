@@ -1,18 +1,10 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { getApiConfig } from "../config.mjs";
 import { getStorageConfig } from "../services/storage.mjs";
 import { readEnvFile } from "../../scripts/load-env.mjs";
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("api/server.mjs resolves storage env from .env.api.local", async () => {
   const envFile = readEnvFile(".env.api.local");

@@ -1,5 +1,10 @@
 # Changelog
 
+## Shared API test helpers
+
+- Added shared API helpers for case execution and response JSON reading.
+- Updated API tests to remove duplicated local helper definitions.
+
 ## Stable E2E selectors
 
 - Added stable workspace/member/module access test ids for complex repeated workspace access UI.

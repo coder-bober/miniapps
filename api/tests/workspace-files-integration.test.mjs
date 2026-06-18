@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
@@ -47,15 +48,6 @@ function createStorageClient() {
   return createSharedStorageClient(storageConfig);
 }
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 async function createDisposableConfirmedUser() {
   const admin = createAdminClient();

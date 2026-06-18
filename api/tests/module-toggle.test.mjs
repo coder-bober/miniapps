@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { buildApiApp } from "../app.mjs";
 import { createQueueService } from "../core/queue/service.mjs";
@@ -59,15 +60,6 @@ function createServices(overrides = {}) {
   };
 }
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 async function withEnabledModules(value, fn) {
   const hadValue = Object.prototype.hasOwnProperty.call(process.env, "ENABLED_MODULES");

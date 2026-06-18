@@ -1,17 +1,9 @@
 import assert from "node:assert/strict";
+import { runCase } from "./helpers/test-helpers.mjs";
 
 import { getUserWorkspaceModuleAccess } from "../core/authz/module-access.mjs";
 import { resolveDefaultWorkspaceMembershipCapabilities } from "../../src/shared/modules/module-capabilities.mjs";
 
-async function runCase(name, fn) {
-  try {
-    await fn();
-    console.log(`ok - ${name}`);
-  } catch (error) {
-    console.error(`not ok - ${name}`);
-    throw error;
-  }
-}
 
 await runCase("workspace-files member defaults do not include delete", async () => {
   assert.deepEqual(resolveDefaultWorkspaceMembershipCapabilities("workspace-files", "member"), [
